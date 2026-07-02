@@ -2,81 +2,125 @@ import Foundation
 import HealthKit
 import Combine
 
-class HeartRateManager: ObservableObject {
+class HeartRateManager: NSObject, ObservableObject, HKWorkoutSessionDelegate, HKLiveWorkoutBuilderDelegate {
 
     @Published var value: Int = 0
+    @Published var isMonitoring: Bool = false
 
     private var healthStore = HKHealthStore()
     private let heartRateQuantity = HKUnit(from: "count/min")
+    private let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
+
+    private var session: HKWorkoutSession?
+    private var builder: HKLiveWorkoutBuilder?
+
+    // MARK: - Public controls
 
     func start() {
-        authorizeHealthKit()
-        startHeartRateQuery(quantityTypeIdentifier: .heartRate)
+        guard !isMonitoring else { return }
+
+        authorizeHealthKit { [weak self] success in
+            guard let self = self, success else { return }
+            self.startWorkoutSession()
+        }
     }
 
-    private func authorizeHealthKit() {
+    func stop() {
+        guard isMonitoring, let session = session else { return }
+        isMonitoring = false   // set duluan, biar gak bisa dipanggil dobel kalau ditap 2x cepat
+        session.stopActivity(with: Date())
+    }
+
+    // MARK: - Authorization
+
+    private func authorizeHealthKit(completion: @escaping (Bool) -> Void) {
         guard HKHealthStore.isHealthDataAvailable() else {
-            print("⚠️ HealthKit tidak tersedia di device ini (jalankan di device fisik, bukan Simulator).")
+            print("⚠️ HealthKit tidak tersedia di device ini.")
+            completion(false)
             return
         }
 
-        let healthKitTypes: Set = [
-            HKObjectType.quantityType(forIdentifier: .heartRate)!
-        ]
-        healthStore.requestAuthorization(toShare: [], read: healthKitTypes) { success, error in
+        let shareTypes: Set = [HKObjectType.workoutType()]
+        let readTypes: Set = [heartRateType]
+
+        healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { success, error in
             if let error = error {
                 print("⚠️ HealthKit authorization error: \(error.localizedDescription)")
             } else {
                 print(success ? "✅ HealthKit authorization granted" : "❌ HealthKit authorization ditolak user")
             }
+            completion(success)
         }
     }
 
-    private func startHeartRateQuery(quantityTypeIdentifier: HKQuantityTypeIdentifier) {
+    // MARK: - Workout session (yang menjaga app tetap hidup walau keluar/background)
 
-        // Tidak pakai devicePredicate: kalau dibatasi ke HKDevice.local(),
-        // data dari Apple Watch akan ikut tersaring karena sumbernya beda device.
-        let updateHandler: (HKAnchoredObjectQuery, [HKSample]?, [HKDeletedObject]?, HKQueryAnchor?, Error?) -> Void = { [weak self] query, samples, deletedObjects, queryAnchor, error in
+    private func startWorkoutSession() {
+        let configuration = HKWorkoutConfiguration()
+        configuration.activityType = .other
+        configuration.locationType = .unknown
 
+        do {
+            session = try HKWorkoutSession(healthStore: healthStore, configuration: configuration)
+            builder = session?.associatedWorkoutBuilder()
+        } catch {
+            print("⚠️ Gagal membuat workout session: \(error.localizedDescription)")
+            return
+        }
+
+        session?.delegate = self
+        builder?.delegate = self
+        builder?.dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: configuration)
+
+        let startDate = Date()
+        session?.startActivity(with: startDate)
+        builder?.beginCollection(withStart: startDate) { [weak self] success, error in
             if let error = error {
-                print("⚠️ Query error: \(error.localizedDescription)")
+                print("⚠️ Gagal mulai collection: \(error.localizedDescription)")
                 return
             }
-
-            guard let samples = samples as? [HKQuantitySample] else {
-                return
+            DispatchQueue.main.async {
+                self?.isMonitoring = true
             }
-
-            print("📥 Menerima \(samples.count) sample heart rate")
-            self?.process(samples, type: quantityTypeIdentifier)
+            print("▶️ Workout session dimulai — heart rate tetap terdeteksi walau app di-background")
         }
-
-        let query = HKAnchoredObjectQuery(
-            type: HKObjectType.quantityType(forIdentifier: quantityTypeIdentifier)!,
-            predicate: nil,
-            anchor: nil,
-            limit: HKObjectQueryNoLimit,
-            resultsHandler: updateHandler
-        )
-
-        query.updateHandler = updateHandler
-
-        // 4. Menjalankan query
-        healthStore.execute(query)
     }
 
-    private func process(_ samples: [HKQuantitySample], type: HKQuantityTypeIdentifier) {
-        var lastHeartRate = 0.0
+    // MARK: - HKWorkoutSessionDelegate
 
-        for sample in samples {
-            if type == .heartRate {
-                lastHeartRate = sample.quantity.doubleValue(for: heartRateQuantity)
+    func workoutSession(_ workoutSession: HKWorkoutSession, didChangeTo toState: HKWorkoutSessionState, from fromState: HKWorkoutSessionState, date: Date) {
+        guard toState == .stopped else { return }
+
+        builder?.endCollection(withEnd: date) { [weak self] success, error in
+            if let error = error {
+                print("⚠️ Gagal endCollection: \(error.localizedDescription)")
             }
+            DispatchQueue.main.async {
+                self?.isMonitoring = false
+                self?.value = 0
+            }
+            self?.session?.end()   // dipanggil cuma sekali, di sini
+            print("⏹️ Workout session berhenti")
         }
+    }
+    
+    func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
+        print("⚠️ Workout session error: \(error.localizedDescription)")
+    }
 
-        // Update UI harus di main thread
+    // MARK: - HKLiveWorkoutBuilderDelegate
+
+    func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {
+        guard collectedTypes.contains(heartRateType),
+              let statistics = workoutBuilder.statistics(for: heartRateType) else { return }
+
+        let bpm = statistics.mostRecentQuantity()?.doubleValue(for: heartRateQuantity) ?? 0
+        print("📥 Heart rate terbaru: \(Int(bpm)) BPM")
+
         DispatchQueue.main.async {
-            self.value = Int(lastHeartRate)
+            self.value = Int(bpm)
         }
     }
+
+    func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {}
 }
