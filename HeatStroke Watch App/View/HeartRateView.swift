@@ -66,12 +66,17 @@ struct HeartRateView: View {
 
     private func infoRow(_ label: String, _ value: Double?, unit: String) -> some View {
         HStack {
-            Text(label).font(.subheadline)
+            Text(label)
             Spacer()
-            Text(value.map { String(format: "%.1f \(unit)", $0) } ?? "-- \(unit)")
-                .font(.subheadline)
-                .fontWeight(.semibold)
+
+            if let value {
+                Text("\(value, specifier: "%.1f")\(unit)")
+            } else {
+                Text("-- \(unit)")
+            }
         }
+        .font(.subheadline)
+        .fontWeight(.semibold)
     }
 
     private func riskColor(_ level: RiskLevel) -> Color {

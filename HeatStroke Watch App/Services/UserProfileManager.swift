@@ -36,7 +36,7 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    private func fetchAge() {
+    func fetchAge() {
         do {
             let birthDateComponents = try healthStore.dateOfBirthComponents()
             guard let birthDate = Calendar.current.date(from: birthDateComponents) else {
