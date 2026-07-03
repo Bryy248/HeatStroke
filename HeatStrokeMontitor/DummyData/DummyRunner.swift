@@ -40,7 +40,7 @@ let dummyRunners: [Runner] = [
 
         coordinate: CLLocationCoordinate2D(
             latitude: -6.2168,
-            longitude: 106.8055
+            longitude: 106.8056
         ),
 
         heatRisk: .risk
@@ -57,7 +57,7 @@ let dummyRunners: [Runner] = [
 
         coordinate: CLLocationCoordinate2D(
             latitude: -6.2145,
-            longitude: 106.8085
+            longitude: 106.8088
         ),
 
         heatRisk: .highRisk
