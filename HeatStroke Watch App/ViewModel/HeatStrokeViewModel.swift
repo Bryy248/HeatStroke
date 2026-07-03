@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation   
 import Combine
 
 class HeatStrokeViewModel: ObservableObject {
@@ -20,11 +21,13 @@ class HeatStrokeViewModel: ObservableObject {
     @Published var heatIndex: Double?
     @Published var riskLevel: RiskLevel = .normal
     @Published var userAge: Int = 25
+    @Published var currentCoordinate: CLLocationCoordinate2D?
 
     private let heartRateManager = HeartRateManager()
     private let environmentManager = EnvironmentDataManager()
     private let wristTemperatureManager = WristTemperatureManager()
     private let userProfileManager = UserProfileManager()
+    private let locationManager = LocationManager()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -33,17 +36,27 @@ class HeatStrokeViewModel: ObservableObject {
     }
 
     func start() {
-        heartRateManager.start()
         environmentManager.start()
-        userProfileManager.authorizeAndFetch()
-        wristTemperatureManager.authorize { [weak self] success in
-            if success { self?.wristTemperatureManager.fetchLatest() }
+        
+        HealthKitAuthManager.shared.requestAllAuthorizations { [weak self] success in
+            guard success else { return }
+            
+            self?.userProfileManager.fetchAge()      
+            self?.wristTemperatureManager.fetchLatest()
+            
+            DispatchQueue.main.async {
+                self?.locationManager.start()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    self?.heartRateManager.start()
+                }
+            }
         }
     }
 
     func stop() {
         heartRateManager.stop()
         environmentManager.stop()
+        locationManager.stop()
     }
 
     private func bindManagers() {
@@ -54,6 +67,7 @@ class HeatStrokeViewModel: ObservableObject {
         environmentManager.$averageHumidity.receive(on: DispatchQueue.main).assign(to: &$averageHumidity)
         wristTemperatureManager.$temperature.receive(on: DispatchQueue.main).assign(to: &$wristTemperature)
         userProfileManager.$age.receive(on: DispatchQueue.main).assign(to: &$userAge)
+        locationManager.$currentCoordinate.receive(on: DispatchQueue.main).assign(to: &$currentCoordinate)
 
         // T_core dihitung ulang tiap kali wrist temp ATAU ambient avg berubah.
         // wrist temp cuma update ~1x/hari, ambient avg update tiap 30 detik —
@@ -91,11 +105,14 @@ class HeatStrokeViewModel: ObservableObject {
         let effectiveHR = Double(hr ?? 70)
         let effectiveCoreTemp = coreTemp ?? 36.8
 
-        riskLevel = HeatStrokeRiskCalculator.overallRisk(
+        let newRiskLevel = HeatStrokeRiskCalculator.overallRisk(
             heartRateBPM: effectiveHR,
             age: userAge,
             coreTemperatureC: effectiveCoreTemp,
             heatIndexC: hi
         )
+
+        riskLevel = newRiskLevel
+        locationManager.updateSamplingInterval(for: newRiskLevel)
     }
 }
