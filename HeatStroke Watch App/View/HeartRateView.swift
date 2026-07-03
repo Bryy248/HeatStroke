@@ -9,70 +9,85 @@ import SwiftUI
 
 struct HeartRateView: View {
 
-    @StateObject private var manager = HeartRateManager()
-    @StateObject private var wristManager = WristTemperatureManager()
+    @StateObject private var viewModel = HeatStrokeViewModel()
 
     var body: some View {
-        VStack(spacing: 24) {
+        ScrollView {
+            VStack(spacing: 16) {
 
+                HStack {
+                    Text("\(viewModel.currentHeartRate)")
+                        .font(.system(size: 36))
+                    Text("BPM")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                    Spacer()
+                }
 
-            HStack {
-                Text("\(manager.value)")
-                    .fontWeight(.regular)
-                    .font(.system(size: 28))
-
-                Text("BPM")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color.red)
-                    .padding(.bottom, 28.0)
-
-                Spacer()
-            }
-
-            HStack {
-                Text("🌡️")
-                    .font(.system(size: 28))
-
-                if let temp = wristManager.temperature {
-                    Text(String(format: "%.1f °C", temp))
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                } else {
-                    Text("-- °C")
-                        .font(.title3)
+                if let avgHR = viewModel.averageHeartRate {
+                    Text("Avg 5 menit: \(avgHR) BPM")
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
-                Text("Wrist Temp")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+                Divider()
 
+                infoRow("⌚ Wrist (raw)", viewModel.wristTemperature, unit: "°C")
+                infoRow("🌡️ Est. Core Temp", viewModel.estimatedCoreTemperature, unit: "°C")
+                infoRow("🌤️ Ambient", viewModel.averageAmbientTemp, unit: "°C")
+                infoRow("💧 Humidity", viewModel.averageHumidity, unit: "%")
+                infoRow("Heat Index", viewModel.heatIndex, unit: "°C")
 
-            Button(action: toggleMonitoring) {
-                Text(manager.isMonitoring ? "Stop" : "Start")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(manager.isMonitoring ? Color.red : Color.green)
-                    .cornerRadius(12)
+                Divider()
+
+                HStack {
+                    Text("Risk:")
+                        .font(.headline)
+                    Spacer()
+                    Text(viewModel.riskLevel.label)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(riskColor(viewModel.riskLevel))
+                }
+
+                Button(action: toggleMonitoring) {
+                    Text(viewModel.isMonitoring ? "Stop" : "Start")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(viewModel.isMonitoring ? Color.red : Color.green)
+                        .cornerRadius(12)
+                }
             }
+            .padding()
         }
-        .padding()
+    }
+
+    private func infoRow(_ label: String, _ value: Double?, unit: String) -> some View {
+        HStack {
+            Text(label).font(.subheadline)
+            Spacer()
+            Text(value.map { String(format: "%.1f \(unit)", $0) } ?? "-- \(unit)")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+        }
+    }
+
+    private func riskColor(_ level: RiskLevel) -> Color {
+        switch level {
+        case .normal: return .green
+        case .moderate: return .yellow
+        case .high: return .orange
+        case .veryHigh: return .red
+        }
     }
 
     private func toggleMonitoring() {
-        if manager.isMonitoring {
-            manager.stop()
+        if viewModel.isMonitoring {
+            viewModel.stop()
         } else {
-            manager.start()
-            wristManager.authorize { success in
-                if success {
-                    wristManager.fetchLatest()
-                }
-            }
+            viewModel.start()
         }
     }
 }

@@ -11,18 +11,17 @@ import Combine
 
 class WristTemperatureManager: ObservableObject {
 
-    @Published var temperature: Double? = nil   // dalam derajat Celsius
+    @Published var temperature: Double? = nil
 
     private var healthStore = HKHealthStore()
     private let wristTemperatureType = HKObjectType.quantityType(forIdentifier: .appleSleepingWristTemperature)!
+    private let dummyTemperature: Double = 34.8
 
     func authorize(completion: @escaping (Bool) -> Void) {
         guard HKHealthStore.isHealthDataAvailable() else {
-            print("⚠️ HealthKit tidak tersedia di device ini.")
             completion(false)
             return
         }
-
         healthStore.requestAuthorization(toShare: [], read: [wristTemperatureType]) { success, error in
             if let error = error {
                 print("⚠️ Wrist temperature authorization error: \(error.localizedDescription)")
@@ -34,27 +33,17 @@ class WristTemperatureManager: ObservableObject {
     func fetchLatest() {
         let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
 
-        let query = HKSampleQuery(
-            sampleType: wristTemperatureType,
-            predicate: nil,
-            limit: 1,
-            sortDescriptors: [sort]
-        ) { [weak self] _, samples, error in
-            if let error = error {
-                print("⚠️ Wrist temperature query error: \(error.localizedDescription)")
-                return
-            }
+        let query = HKSampleQuery(sampleType: wristTemperatureType, predicate: nil, limit: 1, sortDescriptors: [sort]) { [weak self] _, samples, error in
+            guard let self = self else { return }
 
-            guard let sample = samples?.first as? HKQuantitySample else {
-                print("ℹ️ Belum ada data wrist temperature (butuh Apple Watch Series 8+/Ultra dengan sleep tracking semalam).")
+            guard error == nil, let sample = samples?.first as? HKQuantitySample else {
+                print("ℹ️ Belum ada data wrist temperature — pakai dummy.")
+                DispatchQueue.main.async { self.temperature = self.dummyTemperature }
                 return
             }
 
             let celsius = sample.quantity.doubleValue(for: .degreeCelsius())
-
-            DispatchQueue.main.async {
-                self?.temperature = celsius
-            }
+            DispatchQueue.main.async { self.temperature = celsius }
         }
 
         healthStore.execute(query)

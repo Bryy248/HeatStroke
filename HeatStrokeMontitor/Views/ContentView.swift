@@ -16,8 +16,8 @@ struct ContentView: View {
         MKCoordinateRegion(
             center: dummyRoutes.first!.points.first!.coordinate,
             span: MKCoordinateSpan(
-                latitudeDelta: 0.001,
-                longitudeDelta: 0.001
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01
             )
         )
     )
@@ -51,6 +51,7 @@ struct ContentView: View {
                 lineWidth: 6
             )
         }
+        .mapStyle(.standard)
     }
 }
 
