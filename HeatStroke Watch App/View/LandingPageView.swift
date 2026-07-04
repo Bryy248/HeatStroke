@@ -9,7 +9,14 @@ import SwiftUI
 
 struct LandingPageView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            Text("Events")
+                .font(.system(size: 24))
+                .foregroundStyle(.color1)
+            Text("Events")
+                .font(.system(size: 24))
+                .foregroundStyle(.mint)
+        }
     }
 }
 
