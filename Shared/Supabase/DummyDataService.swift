@@ -16,7 +16,7 @@ final class DummyDataService {
 
     func seedDummyData() async {
         do {
-            let event = Event(
+            let event = Events(
                 id: eventId,
                 name: "Jakarta International Marathon",
                 location: "Jakarta",

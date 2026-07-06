@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Event: Codable, Identifiable {
+struct Events: Codable, Identifiable {
     let id: UUID
     let name: String
     let location: String?
