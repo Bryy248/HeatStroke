@@ -11,7 +11,7 @@ struct VerifyView: View {
     let code: String
     
     @Environment(\.dismiss) private var dismiss
-    @State private var event: Event?
+    @State private var event: Events?
     @State private var isLoading = false
     @State private var goToIdentityView = false
     
@@ -36,7 +36,7 @@ struct VerifyView: View {
     }
     
     @ViewBuilder
-    func foundView(_ event: Event) -> some View {
+    func foundView(_ event: Events) -> some View {
         ScrollView{
             VStack {
                 Image(systemName: "checkmark")
@@ -124,7 +124,7 @@ struct VerifyView: View {
         // TODO: ganti dengan cek asli (server / data lokal)
         isLoading = true
         if code == "BTN123" {
-            event = Event(name: "BTN JAKIM 2027",
+            event = Events(name: "BTN JAKIM 2027",
                           date: "Aug 12, 2027 05:00 WIB",
                           location: "Jakarta, Indonesia")
         }
@@ -136,7 +136,7 @@ struct VerifyView: View {
 }
 
 // model sederhana
-struct Event {
+struct Events {
     let name: String
     let date: String
     let location: String
