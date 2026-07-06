@@ -88,6 +88,7 @@ struct IdentityVerifyView: View {
                     .foregroundStyle(.color1)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     @ViewBuilder
@@ -121,6 +122,7 @@ struct IdentityVerifyView: View {
             }
             .padding(.horizontal, 16)
         }
+        .navigationBarBackButtonHidden(true)
     }
     func verifyIdentity() async {
         // TODO: ganti dengan cek asli (server / data lokal)

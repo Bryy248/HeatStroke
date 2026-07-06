@@ -83,6 +83,7 @@ struct VerifyView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     @ViewBuilder
@@ -116,6 +117,7 @@ struct VerifyView: View {
             }
             .padding(.horizontal, 16)
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     func verifyCode() async {
