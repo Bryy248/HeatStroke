@@ -51,23 +51,34 @@ struct HeatStrokeRiskCalculator {
     enum SkinSite {
         case rectal, head, torso, hand, foot
 
-        /// Site-specific α coefficient.
-        /// TODO: isi sitasi paper kamu di sini (reference [29] yang kamu sebutkan).
-        var alpha: Double {
+        /// Selisih tipikal (core − suhu kulit) di lokasi ini saat istirahat, dalam °C.
+        /// Makin perifer (tangan/kaki), makin dingin, jadi selisihnya makin besar.
+        var baseOffset: Double {
             switch self {
-            case .rectal: return 0.0699
-            case .head: return 0.3094
-            case .torso: return 0.5067
-            case .hand: return 0.7665
-            case .foot: return 2.1807
+            case .rectal: return 0.0   // ini praktis sudah core
+            case .torso:  return 1.0
+            case .head:   return 1.5
+            case .hand:   return 2.5   // pergelangan/tangan
+            case .foot:   return 3.5
             }
         }
     }
 
+
     /// Estimasi core body temperature dari suhu kulit (wrist/hand) + ambient.
     /// Formula: T_core = T_skin + α × (T_skin - T_ambient)
-    static func estimatedCoreTemperature(skinTemperature: Double, ambientTemperature: Double, site: SkinSite = .hand) -> Double {
-        skinTemperature + site.alpha * (skinTemperature - ambientTemperature)
+    static func estimatedCoreTemperature(skinTemperature skin: Double,
+                                         ambientTemperature ambient: Double,
+                                         site: SkinSite = .hand) -> Double {
+        // Di atas ambang nyaman (~33°C), pembuangan panas terhambat -> core naik.
+        // Di bawah itu, lingkungan dingin TIDAK menaikkan estimasi core.
+        let comfortAmbient = 33.0
+        let heatGain = 0.25 * max(0, ambient - comfortAmbient)
+
+        let raw = skin + site.baseOffset + heatGain
+
+        // Jaring pengaman: manusia hidup ada di ~35,5–42°C.
+        return min(max(raw, 35.5), 42.0)
     }
 
     // MARK: - Skor per komponen (skala mengikuti paper baru: Table 2, 4, 5)
