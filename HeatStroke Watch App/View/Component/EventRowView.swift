@@ -8,7 +8,8 @@
 import SwiftUI
  
 struct EventRowView: View {
-    let event: Events
+    let event: Event
+    let runner: Runner
  
     var body: some View {
         VStack(alignment: .leading) {
@@ -18,22 +19,22 @@ struct EventRowView: View {
             HStack {
                 Text("BIB:")
                     .fontWeight(.light)
-                Text(event.bib)
+                Text(runner.bibNumber)
                     .fontWeight(.medium)
             }
             .font(.system(size: 11))
  
-            Text(event.formattedDate)
-                .font(.system(size: 11, weight: .light))
+//            Text(event.formattedDate)
+//                .font(.system(size: 11, weight: .light))
         }
         .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
     }
 }
  
-#Preview {
-    List {
-        EventRowView(
-            event: Events(name: "BTN JAKIM 2027", bib: "M12345", date: .now)
-        )
-    }
-}
+//#Preview {
+//    List {
+//        EventRowView(
+//            event: Events(name: "BTN JAKIM 2027", bib: "M12345", date: .now)
+//        )
+//    }
+//}
