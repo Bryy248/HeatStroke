@@ -437,7 +437,7 @@
 				CODE_SIGN_ENTITLEMENTS = "HeatStroke Watch App/HeatStroke Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9KGBU6L6GD;
+				DEVELOPMENT_TEAM = BPKZ3792AR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HeatStroke-Watch-App-Info.plist";
@@ -447,6 +447,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Aplikasi ini memerlukan izin ini untuk memulai sesi pemantauan detak jantung di background.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Aplikasi ini memerlukan lokasi kamu untuk memantau risiko heat stroke";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Aplikasi butuh lokasi";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Aplikasi ini memerlukan akses lokasi untuk melacak posisi kamu saat berolahraga, terutama saat status risiko heat stroke tinggi.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -454,7 +455,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke1.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -477,7 +478,7 @@
 				CODE_SIGN_ENTITLEMENTS = "HeatStroke Watch App/HeatStroke Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9KGBU6L6GD;
+				DEVELOPMENT_TEAM = BPKZ3792AR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HeatStroke-Watch-App-Info.plist";
@@ -487,6 +488,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Aplikasi ini memerlukan izin ini untuk memulai sesi pemantauan detak jantung di background.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Aplikasi ini memerlukan lokasi kamu untuk memantau risiko heat stroke";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Aplikasi butuh lokasi";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Aplikasi ini memerlukan akses lokasi untuk melacak posisi kamu saat berolahraga, terutama saat status risiko heat stroke tinggi.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -494,7 +496,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke1.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -515,11 +517,11 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9KGBU6L6GD;
+				DEVELOPMENT_TEAM = BPKZ3792AR;
 				INFOPLIST_KEY_CFBundleDisplayName = HeatStroke;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -533,11 +535,11 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9KGBU6L6GD;
+				DEVELOPMENT_TEAM = BPKZ3792AR;
 				INFOPLIST_KEY_CFBundleDisplayName = HeatStroke;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStroke;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -554,7 +556,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9KGBU6L6GD;
+				DEVELOPMENT_TEAM = BPKZ3792AR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -568,7 +570,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStrokeMontitor1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStrokeMontitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -592,7 +594,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9KGBU6L6GD;
+				DEVELOPMENT_TEAM = BPKZ3792AR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -606,7 +608,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStrokeMontitor1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Brian.HeatStrokeMontitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

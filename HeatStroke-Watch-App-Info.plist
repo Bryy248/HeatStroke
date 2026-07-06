@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Aplikasi ini memerlukan akses lokasi untuk melacak posisi kamu saat berolahraga, terutama saat status risiko heat stroke tinggi.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

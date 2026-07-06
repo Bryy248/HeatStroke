@@ -6,48 +6,103 @@
 //
 
 import Foundation
-import SwiftData
 import Observation
+internal import PostgREST
+import Supabase
 
 @Observable
 final class LandingPageViewModel {
 
-    private let modelContext: ModelContext
-    var events: [Events] = []
+    var events: [Event] = []
+    var runners: [Runner] = []
+    var isLoading = false
 
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-        fetchEvents()
+    var hasEvents: Bool {
+        !events.isEmpty
     }
 
-    var upcomingEvents: [Events] {
+    // sementara di-comment dulu karena belum ada event date
+//    var upcomingEvents: [Event] {
+//        events
+//            .filter { event in
+//                guard let date = event.startDate else {
+//                    return false
+//                }
+//                return date >= Date()
+//            }
+//            .sorted {
+//                $0.startDate! < $1.startDate!
+//            }
+//    }
+
+//    var pastEvents: [Event] {
+//        events
+//            .filter { event in
+//                guard let date = event.startDate else {
+//                    return false
+//                }
+//                return date < Date()
+//            }
+//            .sorted {
+//                $0.startDate! > $1.startDate!
+//            }
+//    }
+    
+    var upcomingEvents: [Event] {
         events
-            .filter { $0.date >= Date() }
-            .sorted { $0.date < $1.date }
     }
 
-    var pastEvents: [Events] {
-        events
-            .filter { $0.date < Date() }
-            .sorted { $0.date > $1.date }
+    var pastEvents: [Event] {
+        []
     }
 
-    var hasEvents: Bool { !events.isEmpty }
+    @MainActor
+    func fetchEvents() async {
+        isLoading = true
 
-    func fetchEvents() {
-        let descriptor = FetchDescriptor<Events>(
-            sortBy: [SortDescriptor(\.date, order: .forward)]
-        )
         do {
-            events = try modelContext.fetch(descriptor)
-        } catch {
-            print("Gagal fetch events: \(error)")
+            events = try await SupabaseManager.client
+                .from("events")
+                .select()
+                .execute()
+                .value
+
+            runners = try await SupabaseManager.client
+                .from("runners")
+                .select()
+                .execute()
+                .value
+
+        }
+        catch {
+            print(error)
             events = []
+            runners = []
+        }
+
+        isLoading = false
+    }
+
+    @MainActor
+    func delete(_ event: Event) async {
+        do {
+            try await SupabaseManager.client
+                .from("events")
+                .delete()
+                .eq("id", value: event.id)
+                .execute()
+
+            events.removeAll {
+                $0.id == event.id
+            }
+
+        }
+        catch {
+            print(error)
         }
     }
-
-    func delete(_ event: Events) {
-        modelContext.delete(event)
-        fetchEvents()
+    
+    func runner(for event: Event) -> Runner? {
+        runners.first { $0.eventId == event.id }
     }
 }
