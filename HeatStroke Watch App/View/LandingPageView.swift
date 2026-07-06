@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LandingPageView: View {
     
-    var code:Int = 0
+    var code:Int = 1
     var code2: Int = 1
     
     @State var showAddEvent: Bool = false

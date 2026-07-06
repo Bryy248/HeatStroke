@@ -84,11 +84,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DB8EC2722FFBF86500B18503 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DBA002A42FF3F99B0030D7EA = {
 			isa = PBXGroup;
 			children = (
 				DBA002B52FF3F99B0030D7EA /* HeatStroke Watch App */,
 				DBDB68232FF644DC00F9A8D4 /* HeatStrokeMontitor */,
+				DB8EC2722FFBF86500B18503 /* Frameworks */,
 				DBA002AC2FF3F99B0030D7EA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -199,6 +207,8 @@
 			);
 			mainGroup = DBA002A42FF3F99B0030D7EA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DBA002AC2FF3F99B0030D7EA /* Products */;
 			projectDirPath = "";
