@@ -31,8 +31,8 @@ struct VerifyView: View {
             await verifyCode()
         }
         .navigationDestination(isPresented: $goToIdentityView) {
-                    IdentityView()   // ganti dengan view tujuanmu
-                }
+            IdentityView()
+        }
     }
     
     @ViewBuilder
