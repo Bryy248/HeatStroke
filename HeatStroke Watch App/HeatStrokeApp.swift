@@ -12,6 +12,10 @@ struct HeatStroke_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
             LandingPageView()
+            HeartRateView()
+                .task {
+                    await DummyDataService().seedDummyData()
+                }
         }
     }
 }
