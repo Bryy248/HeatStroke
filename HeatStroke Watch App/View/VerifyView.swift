@@ -31,8 +31,8 @@ struct VerifyView: View {
             await verifyCode()
         }
         .navigationDestination(isPresented: $goToIdentityView) {
-                    IdentityView()   // ganti dengan view tujuanmu
-                }
+            IdentityView()
+        }
     }
     
     @ViewBuilder
@@ -83,6 +83,7 @@ struct VerifyView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     @ViewBuilder
@@ -116,6 +117,7 @@ struct VerifyView: View {
             }
             .padding(.horizontal, 16)
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     func verifyCode() async {
