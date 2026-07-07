@@ -61,6 +61,7 @@ struct IdentityView: View {
                 .tint(.color1)
                 .listRowBackground(Color.clear)
                 .padding(.top, 8)
+                .disabled(!viewModel.canConfirm)
             }
             .sheet(isPresented: $viewModel.showBIBKeyboard) {
                 TextField("BIB Number", text: $viewModel.bib)
@@ -73,6 +74,7 @@ struct IdentityView: View {
                                displayedComponents: .date)
                         .datePickerStyle(.wheel)
                     Button("Done") {
+                        viewModel.birthDate = Calendar.current.startOfDay(for: viewModel.birthDate)
                         viewModel.hasBirthDate = true
                         viewModel.showDatePicker = false
                     }

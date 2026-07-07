@@ -157,80 +157,30 @@ struct LandingPageView: View {
     )
 }
 
-#Preview("With Events") {
-    let vm = LandingPageViewModel()
-    let eventId = UUID()
-    vm.events = [
-        Event(
-            id: eventId,
-            name: "BTN Jakim 2027",
-            location: "Jakarta",
-            startTime: "2027-08-12T05:00:00.000+00:00",
-            endTime: nil,
-            createdAt: nil,
-            code: "BTN123"
-        ),
-        Event(
-            id: eventId,
-            name: "JRF 2027",
-            location: "Jakarta",
-            startTime: "2024-05-01T05:00:00.000+00:00",
-            endTime: nil,
-            createdAt: nil,
-            code: "JRF27"
-        )
-    ]
-    
-    vm.runners = [
-        Runner(
-            id: UUID(),
-            eventId: eventId,
-            name: "Brian Chang",
-            bibNumber: "M12345",
-            age: 21,
-            gender: "Male",
-            currentRiskLevel: "Low",
-            lastUpdated: nil,
-            createdAt: nil,
-            registeredBy: nil
-        )
-    ]
-    
-    return LandingPageView(
-        viewModel: vm,
-        shouldFetch: false
-    )
-}
-
-//#Preview("Loading") {
-//    let vm = LandingPageViewModel()
-//    vm.isLoading = true
-//
-//    return LandingPageView(viewModel: vm)
-//}
-
-//#Preview("Empty") {
-//    let vm = LandingPageViewModel()
-//
-//    return LandingPageView(viewModel: vm)
-//}
-
 //#Preview("With Events") {
 //    let vm = LandingPageViewModel()
-//
 //    let eventId = UUID()
-//
 //    vm.events = [
 //        Event(
 //            id: eventId,
 //            name: "BTN Jakim 2027",
 //            location: "Jakarta",
-//            startTime: nil,
+//            startTime: "2027-08-12T05:00:00.000+00:00",
 //            endTime: nil,
-//            createdAt: nil
+//            createdAt: nil,
+//            code: "BTN123"
+//        ),
+//        Event(
+//            id: eventId,
+//            name: "JRF 2027",
+//            location: "Jakarta",
+//            startTime: "2024-05-01T05:00:00.000+00:00",
+//            endTime: nil,
+//            createdAt: nil,
+//            code: "JRF27"
 //        )
 //    ]
-//
+//    
 //    vm.runners = [
 //        Runner(
 //            id: UUID(),
@@ -238,66 +188,117 @@ struct LandingPageView: View {
 //            name: "Brian Chang",
 //            bibNumber: "M12345",
 //            age: 21,
+//            birthDate: "1996-05-14",
 //            gender: "Male",
 //            currentRiskLevel: "Low",
 //            lastUpdated: nil,
-//            createdAt: nil
+//            createdAt: nil,
+//            registeredBy: nil
 //        )
 //    ]
-//
-//    return LandingPageView(viewModel: vm)
+//    
+////    return LandingPageView(
+////        viewModel: vm,
+////        shouldFetch: false
+////    )
 //}
-
-//#Preview("Multiple Events") {
-//    let vm = LandingPageViewModel()
 //
-//    let event1 = UUID()
-//    let event2 = UUID()
+////#Preview("Loading") {
+////    let vm = LandingPageViewModel()
+////    vm.isLoading = true
+////
+////    return LandingPageView(viewModel: vm)
+////}
 //
-//    vm.events = [
-//        Event(
-//            id: event1,
-//            name: "BTN Jakim 2027",
-//            location: "Jakarta",
-//            startTime: nil,
-//            endTime: nil,
-//            createdAt: nil
-//        ),
-//        Event(
-//            id: event2,
-//            name: "Bandung Marathon",
-//            location: "Bandung",
-//            startTime: nil,
-//            endTime: nil,
-//            createdAt: nil
-//        )
-//    ]
+////#Preview("Empty") {
+////    let vm = LandingPageViewModel()
+////
+////    return LandingPageView(viewModel: vm)
+////}
 //
-//    vm.runners = [
-//        Runner(
-//            id: UUID(),
-//            eventId: event1,
-//            name: "Brian",
-//            bibNumber: "M12345",
-//            age: 21,
-//            gender: "Male",
-//            currentRiskLevel: "Low",
-//            lastUpdated: nil,
-//            createdAt: nil
-//        ),
-//        Runner(
-//            id: UUID(),
-//            eventId: event2,
-//            name: "Nabiel",
-//            bibNumber: "H67890",
-//            age: 25,
-//            gender: "Male",
-//            currentRiskLevel: "Medium",
-//            lastUpdated: nil,
-//            createdAt: nil
-//        )
-//    ]
+////#Preview("With Events") {
+////    let vm = LandingPageViewModel()
+////
+////    let eventId = UUID()
+////
+////    vm.events = [
+////        Event(
+////            id: eventId,
+////            name: "BTN Jakim 2027",
+////            location: "Jakarta",
+////            startTime: nil,
+////            endTime: nil,
+////            createdAt: nil
+////        )
+////    ]
+////
+////    vm.runners = [
+////        Runner(
+////            id: UUID(),
+////            eventId: eventId,
+////            name: "Brian Chang",
+////            bibNumber: "M12345",
+////            age: 21,
+////            gender: "Male",
+////            currentRiskLevel: "Low",
+////            lastUpdated: nil,
+////            createdAt: nil
+////        )
+////    ]
+////
+////    return LandingPageView(viewModel: vm)
+////}
 //
-//    return LandingPageView(viewModel: vm)
-//}
-
+////#Preview("Multiple Events") {
+////    let vm = LandingPageViewModel()
+////
+////    let event1 = UUID()
+////    let event2 = UUID()
+////
+////    vm.events = [
+////        Event(
+////            id: event1,
+////            name: "BTN Jakim 2027",
+////            location: "Jakarta",
+////            startTime: nil,
+////            endTime: nil,
+////            createdAt: nil
+////        ),
+////        Event(
+////            id: event2,
+////            name: "Bandung Marathon",
+////            location: "Bandung",
+////            startTime: nil,
+////            endTime: nil,
+////            createdAt: nil
+////        )
+////    ]
+////
+////    vm.runners = [
+////        Runner(
+////            id: UUID(),
+////            eventId: event1,
+////            name: "Brian",
+////            bibNumber: "M12345",
+////            age: 21,
+////            gender: "Male",
+////            currentRiskLevel: "Low",
+////            lastUpdated: nil,
+////            createdAt: nil
+////        ),
+////        Runner(
+////            id: UUID(),
+////            eventId: event2,
+////            name: "Nabiel",
+////            bibNumber: "H67890",
+////            age: 25,
+////            gender: "Male",
+////            currentRiskLevel: "Medium",
+////            lastUpdated: nil,
+////            createdAt: nil
+////        )
+////    ]
+////
+////    return LandingPageView(viewModel: vm)
+////}
+//

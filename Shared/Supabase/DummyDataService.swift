@@ -14,6 +14,15 @@ final class DummyDataService {
 
     private let eventId = UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
 
+    func makeDate(day: Int, month: Int, year: Int) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = day
+        components.hour = 12
+        return Calendar.current.date(from: components)!
+    }
+    
     func seedDummyData() async {
         do {
             let event = Event(
@@ -36,8 +45,9 @@ final class DummyDataService {
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
                     eventId: eventId,
                     name: "Bryan Chang",
-                    bibNumber: "BIB001",
+                    bibNumber: "M1234",
                     age: 21,
+                    birthDate: "2004-01-01",
                     gender: "male",
                     currentRiskLevel: "safe",
                     lastUpdated: nil,
@@ -48,9 +58,10 @@ final class DummyDataService {
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!,
                     eventId: eventId,
                     name: "Vanya",
-                    bibNumber: "BIB002",
-                    age: 24,
-                    gender: "male",
+                    bibNumber: "F2222",
+                    age: 21,
+                    birthDate: "2004-01-01",
+                    gender: "female",
                     currentRiskLevel: "caution",
                     lastUpdated: nil,
                     createdAt: nil,
@@ -60,8 +71,9 @@ final class DummyDataService {
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222223")!,
                     eventId: eventId,
                     name: "Nabiel A",
-                    bibNumber: "BIB003",
-                    age: 27,
+                    bibNumber: "M2222",
+                    age: 21,
+                    birthDate:  "2004-01-01",
                     gender: "male",
                     currentRiskLevel: "danger",
                     lastUpdated: nil,
@@ -69,13 +81,27 @@ final class DummyDataService {
                     registeredBy: nil
                 )
             ]
-
+            
             try await client
                 .from("runners")
                 .upsert(runners, onConflict: "event_id,bib_number")
                 .execute()
 
             print("succesful")
+            
+            let sensors = Sensor(
+                id: UUID(uuidString: "12222222-2222-2222-2222-222222222223")!,
+                eventId: eventId,
+                sensorName: "ABC",
+                latitude: 100.0,
+                longitude: -20.0,
+                createdAt: nil
+            )
+            
+            try await client
+                .from("sensors")
+                .upsert(sensors, onConflict: "id")
+                .execute()
 
         } catch {
             print("failed \(error)")

@@ -51,25 +51,37 @@ final class IdentityVerifyViewModel {
             state = .notFound
         }
     }
+    
+    enum DeviceIdentity {
+        static var currentDeviceId: UUID {
+            if let saved = UserDefaults.standard.string(forKey: "device_id"),
+               let uuid = UUID(uuidString: saved) {
+                return uuid
+            }
+            let newId = UUID()
+            UserDefaults.standard.set(newId.uuidString, forKey: "device_id")
+            return newId
+        }
+    }
 
     // set registered_by = user ini, biar muncul di landing page
     @MainActor
     func claim(_ runner: Runner) async {
-        guard let uid = SupabaseManager.client.auth.currentUser?.id else { return }
+        let deviceId = DeviceIdentity.currentDeviceId
         do {
             try await SupabaseManager.client
                 .from("runners")
-                .update(["registered_by": uid])
+                .update(["registered_by": deviceId.uuidString])
                 .eq("id", value: runner.id)
                 .execute()
         }
-        catch { print(error) }
+        catch {
+            print("❌ Error claim runner: \(error)")
+        }
     }
 
     private static func dateString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        f.timeZone = TimeZone(identifier: "UTC")
-        return f.string(from: date)
+        let c = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", c.year!, c.month!, c.day!)
     }
 }
