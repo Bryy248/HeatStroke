@@ -13,6 +13,7 @@ struct Runner: Codable, Identifiable {
     let name: String
     let bibNumber: String
     let age: Int?
+    let birthDate: String?
     let gender: String?
     let currentRiskLevel: String?
     let lastUpdated: String?
@@ -25,6 +26,7 @@ struct Runner: Codable, Identifiable {
         case name
         case bibNumber = "bib_number"
         case age
+        case birthDate = "birth_date"
         case gender
         case currentRiskLevel = "current_risk_level"
         case lastUpdated = "last_updated"
