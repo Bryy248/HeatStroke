@@ -39,8 +39,6 @@ struct ReadyView: View {
                     .tint(.color1)
                     .disabled(isLoading)
                 }
-//                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .scrollDisabled(true)
             } else {
                 VStack(spacing: 25){
                     HStack(spacing: 8) {
@@ -116,15 +114,18 @@ struct ReadyView: View {
                     .stroke(.color1, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                     .frame(width: 50, height: 50)
                     .rotationEffect(.degrees(rotate ? 360 : 0))
-                    .drawingGroup()
-                    .onAppear {
-                        withAnimation(
-                            .linear(duration: 1)
-                            .repeatForever(autoreverses: false)
-                        ) {
-                            rotate = true
-                        }
+            }
+            .frame(width: 50, height: 50)
+            .drawingGroup()
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    withAnimation(
+                        .linear(duration: 1)
+                        .repeatForever(autoreverses: false)
+                    ) {
+                        rotate = true
                     }
+                }
             }
         }
     }
