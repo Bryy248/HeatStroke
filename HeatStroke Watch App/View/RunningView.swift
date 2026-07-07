@@ -8,280 +8,275 @@
 import SwiftUI
 
 struct RunningView: View {
-
-    //for the countdown
-    @State var countdown = 4
     
-    @State var isReady: Bool = false
-
-    @State var isHeatRisk: Bool = false
+    @State private var viewModel = RunningViewModel()
     
     var body: some View {
-        if !isReady {
-            VStack(spacing: 16){
-                ZStack {
-                    Circle()
-                        .stroke(.color1, style: StrokeStyle(lineWidth: 11, lineCap: .round))
-                        .frame(width: 131, height: 131)
-                    if countdown == 4 {
-                        Text("Ready")
-                            .font(.system(size: 32, weight: .regular))
-                            .foregroundColor(.white)
-                            .contentTransition(.numericText())
-                    } else {
-                        Text("\(countdown)")
-                            .font(.system(size: 32, weight: .regular))
-                            .foregroundColor(.white)
-                            .contentTransition(.numericText())
-                    }
-                }
-                Text("Start Monitoring")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
-            }
-            .task {
-                await startCountdown()
-            }
-        } else {
-            if isHeatRisk {
-                VStack(spacing: 15){
-                    VStack(spacing: 12) {
-                        Text("Heat Risk High")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.red)
-                        
-                        HStack(spacing: 5){
-                            VStack(alignment: .center) {
-                                Text("178")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.gray)
-
-                                HStack(spacing: 2) {
-                                    Image(systemName: "heart.fill")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.gray)
-                                    
-                                    Text("BPM")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .frame(width: 75, height: 40)
-                            .background(Color.finish)
-                            .cornerRadius(7)
-                            
-                            VStack(alignment: .center) {
-                                Text("39.1°")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.gray)
-                                
-                                HStack(spacing: 2) {
-                                    Image(systemName: "thermometer.variable.and.figure")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.gray)
-                                    
-                                    Text("BODY")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .frame(width: 75, height: 40)
-                            .background(Color.finish)
-                            .cornerRadius(7)
-                        }
-                        
-                        Text("Slow your pace & drink water now!")
-                            .font(.system(size: 10, weight: .regular))
-                            .foregroundColor(.white)
-                    }
-                    
-                    VStack(spacing: 3){
-                        Button {
-                            // Aksi Button akan menghentikan race dan memberi warning
-                        } label: {
-                            Text("I'm not okay")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .frame(width: 168, height: 52)
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
-                        
-                        Button {
-                            // Aksi Button akan membuat pelari dapat melanjutkan lari ke tampilan awal
-                        } label: {
-                            Text("I'm fine")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .frame(width: 168, height: 52)
-                        .buttonStyle(.borderedProminent)
-                        .tint(.color1)
-                    }
-                }
-            }
-            else {
-                TabView {
-                    //page 1
-                    VStack(alignment: .center){
-                        HStack(spacing: 10){
-                            VStack(spacing: 6){
-                                Button {
-                                    //the race will stopped
-                                } label: {
-                                    Image(systemName: "flag.pattern.checkered")
-                                        .font(.system(size: 28, weight: .semibold))
-                                        .foregroundColor(.red)
-                                }
-                                .buttonStyle(.plain)
-                                .frame(width: 76, height: 50)
-                                .background(Color.finish)
-                                .buttonStyle(.bordered)
-                                .cornerRadius(25)
-                                
-                                Text("Finish")
-                                    .font(.system(size: 12, weight: .regular))
-                                    .foregroundColor(.white)
-                            }
-                            
-                            VStack(spacing: 6){
-                                Button {
-                                    //the race will be resume
-                                } label: {
-                                    Image(systemName: "play.fill")
-                                        .font(.system(size: 28, weight: .semibold))
-                                        .foregroundColor(.yellow)
-                                }
-                                .buttonStyle(.plain)
-                                .frame(width: 76, height: 50)
-                                .background(Color.pause)
-                                .buttonStyle(.bordered)
-                                .cornerRadius(25)
-                                
-                                Text("Resume")
-                                    .font(.system(size: 12, weight: .regular))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        Spacer()
-                    }
-                    
-                    //page 2
-                    ZStack(alignment: .center){
-                        Circle()
-                            .fill(.color1)
-                            .frame(width: 58, height: 58)
-                            .blur(radius: 58)
-                            .shadow(color: .color1, radius: 58)
-                        
-                        VStack{
-                            Image(systemName: "figure.run")
-                                .font(.system(size: 48))
-                                .foregroundStyle(.color1)
-                            
-                            Text("Safe Zone")
-                                .font(.system(size: 24, weight: .medium))
-                                .foregroundColor(.color1)
-                        }
-                    }
-                    
-                    //page 3
-                    VStack(spacing: 20){
-                        
-                        HStack(spacing: 20){
-                            
-                            VStack(spacing: 5) {
-                                Text("138") //placeholder hr
-                                    .font(.system(size: 24, weight: .regular))
-                                    .foregroundColor(.white)
-                                
-                                HStack(spacing: 2) {
-                                    Image(systemName: "heart.fill")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.red)
-                                    
-                                    Text("BPM")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.red)
-                                }
-                            }
-                            
-                            VStack(spacing: 5) {
-                                Text("37°") //placeholder body
-                                    .font(.system(size: 24, weight: .regular))
-                                    .foregroundColor(.white)
-                                
-                                HStack(spacing: 2) {
-                                    Image(systemName: "thermometer.variable.and.figure")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.suhuBgcolor)
-                                    
-                                    Text("BODY")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.suhuBgcolor)
-                                }
-                            }
-                            
-                        }
-                        
-                        HStack(spacing: 20){
-                            VStack(spacing: 5) {
-                                Text("31°") //placeholder amb
-                                    .font(.system(size: 24, weight: .regular))
-                                    .foregroundColor(.white)
-                                
-                                HStack(spacing: 2) {
-                                    Image(systemName: "thermometer.sun.fill")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.yellow)
-                                    
-                                    Text("AMB")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.yellow)
-                                }
-                            }
-                            
-                            VStack(spacing: 5) {
-                                HStack(alignment: .lastTextBaseline, spacing: 2) {
-                                    Text("78") //placeholder hum
-                                        .font(.system(size: 24, weight: .medium))
-                                    
-                                    Text("%")
-                                        .font(.system(size: 12, weight: .medium))
-                                }
-                                
-                                HStack(spacing: 2) {
-                                    Image(systemName: "humidity.fill")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.humid)
-                                    
-                                    Text("HUM")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.humid)
-                                }
-                            }
-                            
-                        }
-                    }
-                    
-                }
-                .tabViewStyle(.page)
-            }
+        switch viewModel.state {
+        case .ready:
+            ReadyView
+        case .countdown:
+            CountdownView
+        case .running:
+            RunningView
         }
     }
     
-    //countdown
-    func startCountdown() async { //async -> timer tanpa freeze
-
-            for number in stride(from: 4, through: 1, by: -1) { //loop dari 4 hingga 1
-                countdown = number
-                try? await Task.sleep(for: .seconds(1))
-                //await -> tunggu operasi selesai, task sleep -> program menunggu 1s
+    private var ReadyView: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Text("Ready")
+                    .font(.system(size: 32, weight: .regular))
+                Circle()
+                    .trim(from: 0, to: viewModel.progressReady)
+                    .stroke(
+                        .color1,
+                        style: StrokeStyle(
+                            lineWidth: 11,
+                            lineCap: .round
+                        )
+                    )
+                    .rotationEffect(.degrees(90))
+                    .frame(width: 131, height: 131)
+                    .onAppear {viewModel.startReady()}
             }
-
-            // Countdown finished -> status berubah
-            isReady = true
+            Text("Start Monitoring")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white)
         }
-}
+    }
+    
+    private var CountdownView: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Text("\(viewModel.countdown)")
+                    .font(.system(size: 32, weight: .regular))
+                
+                ZStack {
+                    Circle()
+                        .stroke(.color1.opacity(0.25), lineWidth: 11)
+                    
+                    Circle()
+                        .trim(from: 0, to: viewModel.progressCountdown)
+                        .stroke(.color1, style: StrokeStyle(lineWidth: 11, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+                .frame(width: 131, height: 131)
+                .task {await viewModel.startCountdown()}
+            }
+            Text("Start Monitoring")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white)
+        }
+    }
+    
+    private var RunningView: some View {
+        TabView(selection:$viewModel.selectedTab) {
+            
+            //left page
+            VStack (spacing: 10) {
+                HStack(spacing: 10) {
+                    // Finish
+                    VStack(spacing: 6) {
+                        Button {
+                            // The race will stop -> goes to finished page
+                        } label: {
+                            Image(systemName: "flag.pattern.checkered")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundColor(.red)
+                        }
+                        .buttonStyle(.plain)
+                        .frame(width: 76, height: 50)
+                        .background(Color.finish)
+                        .cornerRadius(25)
+                        
+                        Text("Finish")
+                            .font(.system(size: 12))
+                            .foregroundColor(.white)
+                    }
+                    
+                    // Pause / Resume
+                    VStack(spacing: 6) {
+                        Button {
+                            viewModel.isPaused.toggle()
+                            // paused
+                        } label: {
+                            Image(systemName: viewModel.isPaused ? "play.fill" : "pause.fill")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundColor(.yellow)
+                        }
+                        .buttonStyle(.plain)
+                        .frame(width: 76, height: 50)
+                        .background(Color.pause)
+                        .cornerRadius(25)
+                        .disabled(viewModel.isFinished == true)
+                        
+                        Text(viewModel.isPaused ? "Resume" : "Pause")
+                            .font(.system(size: 12))
+                            .foregroundColor(.white)
+                    }
+                }
+                // emergency call
+                VStack(spacing: 6) {
+                    Button {
+                        // They will call emergency
+                        // goes to Emergency view
+                    } label: {
+                        Image(systemName: "phone.fill")
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(width: 162, height: 50)
+                    .background(Color.finish)
+                    .cornerRadius(25)
+                    
+                    Text("Call emergency")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white)
+                }
+            }.tag(0)
+            
+            //center page
+            ScrollView {
+                VStack(spacing: 5){
+                    ZStack {
+                        Circle()
+                            .foregroundStyle(viewModel.condition.color)
+                            .blur(radius: 42)
+                            .shadow(color: .color1, radius: 42)
+                            .frame(width: 65, height: 65)
+                        
+                        VStack {
+                            Image(systemName: viewModel.condition.icon)
+                                .font(.system(size: 48))
+                                .foregroundStyle(viewModel.condition.color)
+                            
+                            Text(viewModel.condition.title)
+                                .font(.system(size: 24, weight: .medium))
+                                .foregroundColor(viewModel.condition.color)
+                        }
+                        .frame(width: 141, height: 110)
+                    }
+                    
+                    if viewModel.firstTimeDangereous && viewModel.condition == .emergency {
+                        Text("Slow down your pace & drink water now!")
+                            .font(.system(size: 16, weight: .light))
+                            .foregroundColor(viewModel.isPaused ? .gray :.white)
+                            .multilineTextAlignment(.center)
+                        
+                        Button {
+                            // goes to emergency view
+                        } label: {
+                            Text("I'm not okay")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(width: 168, height: 52)
+                        .background(.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 1000))
+                        .buttonStyle(.plain)
+                        
+                        Button {
+                            viewModel.firstTimeDangereous.toggle()
+                            // stay in here
+                        } label: {
+                            Text("I'm fine")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(width: 168, height: 52)
+                        .background(.color1)
+                        .clipShape(RoundedRectangle(cornerRadius: 1000))
+                        .buttonStyle(.plain)
+                        
+                    } else {
+                        Text(viewModel.timer)
+                            .font(.system(size: 16, weight: .light))
+                            .foregroundColor(viewModel.isPaused ? .gray :.white)
+                    }
+                }
+            } .tag(1)
+            
+            //right page
+            VStack(spacing: 20) {
+                HStack(spacing: 20) {
+                    VStack(spacing: 5) {
+                        Text("\(viewModel.heartRate)")
+                            .font(.system(size: 24))
+                            .foregroundColor(viewModel.condition.fontcolor)
+
+                        HStack(spacing: 2) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                            
+                            Text("BPM")
+                                .foregroundColor(.red)
+                        }
+                        .font(.system(size: 14))
+                    }
+                    
+                    VStack(spacing: 5) {
+                        Text("\(viewModel.bodyTemperature)°")
+                            .font(.system(size: 24))
+                            .foregroundColor(viewModel.condition.fontcolor)
+
+                        HStack(spacing: 2) {
+                            Image(systemName: "thermometer.variable.and.figure")
+                                .foregroundColor(.suhuBgcolor)
+                            
+                            Text("BODY")
+                                .foregroundColor(.suhuBgcolor)
+                        }
+                        .font(.system(size: 14))
+                    }
+                }
+                
+                HStack(spacing: 20) {
+                    
+                    VStack(spacing: 5) {
+                        Text("\(viewModel.ambientTemperature)°")
+                            .font(.system(size: 24))
+                            .foregroundColor(viewModel.condition.fontcolor)
+                        
+                        HStack(spacing: 2) {
+                            Image(systemName: "thermometer.sun.fill")
+                                .foregroundColor(.yellow)
+                            
+                            Text("AMB")
+                                .foregroundColor(.yellow)
+                        }
+                        .font(.system(size: 14))
+                    }
+                    
+                    VStack(spacing: 5) {
+                        HStack(alignment: .lastTextBaseline, spacing: 2) {
+                            Text("\(viewModel.humidity)")
+                                .font(.system(size: 24, weight: .medium))
+                                .foregroundColor(viewModel.condition.fontcolor)
+                            
+                            Text("%")
+                                .font(.system(size: 12, weight: .medium))
+                        }
+                        
+                        HStack(spacing: 2) {
+                            Image(systemName: "humidity.fill")
+                                .foregroundColor(.humid)
+                            
+                            Text("HUM")
+                                .foregroundColor(.humid)
+                        }
+                        .font(.system(size: 14))
+                    }
+                }
+            }
+            .tag(2)
+        }
+        .tabViewStyle(.page)
+        }
+    }
 
 #Preview {
     RunningView()
 }
+

@@ -34,10 +34,19 @@ struct ReadyView: View {
                         Text("Confirm")
                             .font(.system(size: 14, weight: .semibold))
                     }
-                    .frame(width: 168, height: 52)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.color1)
-                    .disabled(isLoading)
+                }
+                
+            }
+        } else {
+            VStack(spacing: 25){
+                HStack(spacing: 8) {
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.color1)
+                    
+                    Text("Sensor connected")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.color1)
                 }
             } else {
                 VStack(spacing: 25){
