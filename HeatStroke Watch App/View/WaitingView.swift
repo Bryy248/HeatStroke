@@ -92,7 +92,7 @@ struct WaitingView: View {
             }
         }
         .navigationDestination(isPresented: $navigateToReady) {
-            ReadyView()
+            ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
         }
     }
     
