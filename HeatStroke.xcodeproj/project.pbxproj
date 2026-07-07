@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F4D901B2FF7D25400AD12BB /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7F4D901A2FF7D25400AD12BB /* Supabase */; };
+		7F4D90292FF7D33200AD12BB /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7F4D90282FF7D33200AD12BB /* Supabase */; };
 		DBA002B22FF3F99B0030D7EA /* HeatStroke Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DBA002B12FF3F99B0030D7EA /* HeatStroke Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -41,6 +43,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7F4D900E2FF7D0AC00AD12BB /* Exceptions for "Shared" folder in "HeatStrokeMontitor" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Supabase/DummyDataService.swift,
+				Supabase/SupabaseManager.swift,
+			);
+			target = DBDB68212FF644DC00F9A8D4 /* HeatStrokeMontitor */;
+		};
+		7F4D90102FF7D0BC00AD12BB /* Exceptions for "Config" folder in "HeatStrokeMontitor" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				SupabaseConfig.plist,
+			);
+			target = DBDB68212FF644DC00F9A8D4 /* HeatStrokeMontitor */;
+		};
 		DBDB68362FF6523900F9A8D4 /* Exceptions for "HeatStroke Watch App" folder in "HeatStroke Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -51,6 +68,22 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		7F4D8FFE2FF7BC0A00AD12BB /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7F4D900E2FF7D0AC00AD12BB /* Exceptions for "Shared" folder in "HeatStrokeMontitor" target */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		7F4D90092FF7CBA600AD12BB /* Config */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7F4D90102FF7D0BC00AD12BB /* Exceptions for "Config" folder in "HeatStrokeMontitor" target */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		DBA002B52FF3F99B0030D7EA /* HeatStroke Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -71,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F4D901B2FF7D25400AD12BB /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,17 +112,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F4D90292FF7D33200AD12BB /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7F4D90112FF7D24000AD12BB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DBA002A42FF3F99B0030D7EA = {
 			isa = PBXGroup;
 			children = (
+				7F4D90092FF7CBA600AD12BB /* Config */,
+				7F4D8FFE2FF7BC0A00AD12BB /* Shared */,
 				DBA002B52FF3F99B0030D7EA /* HeatStroke Watch App */,
 				DBDB68232FF644DC00F9A8D4 /* HeatStrokeMontitor */,
+				7F4D90112FF7D24000AD12BB /* Frameworks */,
 				DBA002AC2FF3F99B0030D7EA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -138,10 +183,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				7F4D8FFE2FF7BC0A00AD12BB /* Shared */,
+				7F4D90092FF7CBA600AD12BB /* Config */,
 				DBA002B52FF3F99B0030D7EA /* HeatStroke Watch App */,
 			);
 			name = "HeatStroke Watch App";
 			packageProductDependencies = (
+				7F4D901A2FF7D25400AD12BB /* Supabase */,
 			);
 			productName = "HeatStroke Watch App";
 			productReference = DBA002B12FF3F99B0030D7EA /* HeatStroke Watch App.app */;
@@ -164,6 +212,7 @@
 			);
 			name = HeatStrokeMontitor;
 			packageProductDependencies = (
+				7F4D90282FF7D33200AD12BB /* Supabase */,
 			);
 			productName = HeatStrokeMontitor;
 			productReference = DBDB68222FF644DC00F9A8D4 /* HeatStrokeMontitor.app */;
@@ -199,6 +248,9 @@
 			);
 			mainGroup = DBA002A42FF3F99B0030D7EA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7F4D8FFD2FF7BB6E00AD12BB /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DBA002AC2FF3F99B0030D7EA /* Products */;
 			projectDirPath = "";
@@ -395,6 +447,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Aplikasi ini memerlukan izin ini untuk memulai sesi pemantauan detak jantung di background.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Aplikasi ini memerlukan lokasi kamu untuk memantau risiko heat stroke";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Aplikasi butuh lokasi";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Aplikasi ini memerlukan akses lokasi untuk melacak posisi kamu saat berolahraga, terutama saat status risiko heat stroke tinggi.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -435,6 +488,7 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Aplikasi ini memerlukan izin ini untuk memulai sesi pemantauan detak jantung di background.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Aplikasi ini memerlukan lokasi kamu untuk memantau risiko heat stroke";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Aplikasi butuh lokasi";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Aplikasi ini memerlukan akses lokasi untuk melacak posisi kamu saat berolahraga, terutama saat status risiko heat stroke tinggi.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -612,6 +666,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7F4D8FFD2FF7BB6E00AD12BB /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7F4D901A2FF7D25400AD12BB /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F4D8FFD2FF7BB6E00AD12BB /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		7F4D90282FF7D33200AD12BB /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F4D8FFD2FF7BB6E00AD12BB /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DBA002A52FF3F99B0030D7EA /* Project object */;
 }

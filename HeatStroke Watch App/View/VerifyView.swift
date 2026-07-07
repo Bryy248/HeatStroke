@@ -8,31 +8,34 @@
 import SwiftUI
 
 struct VerifyView: View {
-    let code: String
     
     @Environment(\.dismiss) private var dismiss
-    @State private var event: Event?
-    @State private var isLoading = false
     @State private var goToIdentityView = false
+    @State private var viewModel: VerifyViewModel
+    
+    init(code: String) {
+            _viewModel = State(initialValue: VerifyViewModel(code: code))
+        }
     
     var body: some View {
         Group {
-            if isLoading {
+            switch viewModel.state {
+            case .loading:
                 ProgressView()
-            }
-            else if let event {
+            case .found(let event):
                 foundView(event)
-            }
-            else {
+            case .notFound:
                 notFoundView
             }
         }
         .task {
-            await verifyCode()
+            await viewModel.verify()
         }
         .navigationDestination(isPresented: $goToIdentityView) {
-                    IdentityView()   // ganti dengan view tujuanmu
-                }
+            if case .found(let event) = viewModel.state {
+                    IdentityView(event: event)
+            }
+        }
     }
     
     @ViewBuilder
@@ -52,7 +55,9 @@ struct VerifyView: View {
                     .foregroundStyle(.color1)
                     .padding(.bottom, 7)
                 
-                Text("\(event.date) • \(event.location)")
+                // kalau nanti sudah ada date
+//                Text("\(event.date) • \(event.location)")
+                Text(viewModel.dateLocationText(for: event))
                     .font(.system(size: 12, weight: .regular))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.gray)
@@ -83,6 +88,7 @@ struct VerifyView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     @ViewBuilder
@@ -107,41 +113,22 @@ struct VerifyView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.gray)
                 
-                Button("Try Again") {
-                    dismiss()
-                }
-                .buttonStyle(.bordered)
-                .padding(.top, 16)
-                .frame(width: 168, height: 52)
+                FailButton()
             }
             .padding(.horizontal, 16)
         }
-    }
-    
-    func verifyCode() async {
-        // TODO: ganti dengan cek asli (server / data lokal)
-        isLoading = true
-        if code == "BTN123" {
-            event = Event(name: "BTN JAKIM 2027",
-                          date: "Aug 12, 2027 05:00 WIB",
-                          location: "Jakarta, Indonesia")
-        }
-        else {
-            event = nil
-        }
-        isLoading = false
+        .navigationBarBackButtonHidden(true)
     }
 }
 
-// model sederhana
-struct Event {
-    let name: String
-    let date: String
-    let location: String
-}
-
-#Preview {
+#Preview("Found") {
     NavigationStack {
         VerifyView(code: "BTN123")
+    }
+}
+
+#Preview("Not Found") {
+    NavigationStack {
+        VerifyView(code: "XXXXX")
     }
 }

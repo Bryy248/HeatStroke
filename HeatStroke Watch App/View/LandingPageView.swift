@@ -9,278 +9,295 @@ import SwiftUI
 
 struct LandingPageView: View {
     
-    var code:Int = 0
-    var code2: Int = 1
+    @State private var viewModel: LandingPageViewModel
     
-    @State var showAddEvent: Bool = false
+    // agar bisa preview
+    private let shouldFetch: Bool
+    init(
+        viewModel: LandingPageViewModel = LandingPageViewModel(),
+        shouldFetch: Bool = true
+    ) {
+        _viewModel = State(initialValue: viewModel)
+        self.shouldFetch = shouldFetch
+    }
+    
+    
+    @State private var showAddEvent = false
     
     var body: some View {
         NavigationStack {
-            content
-                .navigationTitle("Events")
-                .overlay(alignment: .bottomTrailing) {
-                    if code != 0 {
-                        Button {
-                            showAddEvent = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.circle)
-                        .frame(width: 30, height: 3)
-                        .padding(.trailing, 8)
-                    }
+            Group {
+                if viewModel.isLoading {
+                    ProgressView()
                 }
-                .navigationDestination(isPresented: $showAddEvent) {
-                    MarathonCodeView()
+                else {
+                    content
                 }
+            }
+            .navigationTitle("Events")
+            .overlay(alignment: .bottomTrailing) {
+                if viewModel.hasEvents {
+                    addIconButton
+                }
+            }
+            .navigationDestination(isPresented: $showAddEvent) {
+                MarathonCodeView()
+            }
+        }
+        .task {
+            guard shouldFetch else { return } // untuk preview
+            await viewModel.fetchEvents()
         }
     }
+    
     @ViewBuilder
-    var content: some View {
-        
-        if code == 0 {
-            if code2 == 0 {
-                Spacer()
-                Text("No Events")
-                    .font(.system(size: 14, weight: .medium))
-                
-                Spacer()
-                
-                Button {
-                    // Aksi Button Ke MarathonCodeView
-                } label: {
-                    Text("Add Event")
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .frame(width: 152, height: 42)
-                .buttonStyle(.borderedProminent)
-                .tint(.color1)
-            }
-            else {
-                List {
-                    Section {
-                        Text("No Events")
-                            .font(.system(size: 14, weight: .medium))
-                            .frame(maxWidth: .infinity)
-                        
-                        Button {
-                            showAddEvent = true
-                        } label: {
-                            Text("Add Event")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .frame(width: 152, height: 42)
-                        .buttonStyle(.borderedProminent)
-                        .frame(maxWidth: .infinity)
-                        .tint(.color1)
-                    }
-                    .listRowBackground(Color.clear)
-                    Section {
-                        VStack(alignment: .leading) {
-                            Text("BTN JAKIM 2027")
-                                .font(.system(size: 14, weight: .semibold))
-                            HStack {
-                                Text("BIB:").fontWeight(.light)
-                                Text("M12345").fontWeight(.medium)
-                            }
-                            .font(.system(size: 11))
-                            Text("Aug 12, 04:30 WIB")
-                                .font(.system(size: 11, weight: .light))
-                        }
-                        .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                // aksi hapus di sini
-                            } label: {
-                                Label("Hapus", systemImage: "trash")
-                            }
-                        }
-                        VStack(alignment: .leading) {
-                            Text("BTN JAKIM 2027")
-                                .font(.system(size: 14, weight: .semibold))
-                            HStack {
-                                Text("BIB:")
-                                    .fontWeight(.light)
-                                Text("M12345")
-                                    .fontWeight(.medium)
-                            }
-                            .font(.system(size: 11))
-                            Text("Aug 12, 04:30 WIB")
-                                .font(.system(size: 11, weight: .light))
-                        }
-                        .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                // aksi hapus di sini
-                            } label: {
-                                Label("Hapus", systemImage: "trash")
-                            }
-                        }
-                        VStack(alignment: .leading) {
-                            Text("BTN JAKIM 2027")
-                                .font(.system(size: 14, weight: .semibold))
-                            HStack {
-                                Text("BIB:").fontWeight(.light)
-                                Text("M12345").fontWeight(.medium)
-                            }
-                            .font(.system(size: 11))
-                            Text("Aug 12, 04:30 WIB")
-                                .font(.system(size: 11, weight: .light))
-                        }
-                        .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                // aksi hapus di sini
-                            } label: {
-                                Label("Hapus", systemImage: "trash")
-                            }
-                        }
-                    } header: {
-                        Text("Past")
-                            .font(.system(size: 11, weight: .medium))
-                            .textCase(nil)
-                    }
-                }
-            }
+    private var content: some View {
+        if viewModel.upcomingEvents.isEmpty && viewModel.pastEvents.isEmpty {
+            emptyState
         }
         else {
             List {
-                Section {
-                    VStack(alignment: .leading) {
-                        Text("BTN JAKIM 2027")
-                            .font(.system(size: 14, weight: .semibold))
-                        HStack {
-                            Text("BIB:").fontWeight(.light)
-                            Text("M12345").fontWeight(.medium)
-                        }
-                        .font(.system(size: 11))
-                        Text("Aug 12, 04:30 WIB")
-                            .font(.system(size: 11, weight: .light))
-                    }
-                    .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            // aksi hapus di sini
-                        } label: {
-                            Label("Hapus", systemImage: "trash")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("BTN JAKIM 2027")
-                            .font(.system(size: 14, weight: .semibold))
-                        HStack {
-                            Text("BIB:")
-                                .fontWeight(.light)
-                            Text("M12345")
-                                .fontWeight(.medium)
-                        }
-                        .font(.system(size: 11))
-                        Text("Aug 12, 04:30 WIB")
-                            .font(.system(size: 11, weight: .light))
-                    }
-                    .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            // aksi hapus di sini
-                        } label: {
-                            Label("Hapus", systemImage: "trash")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("BTN JAKIM 2027")
-                            .font(.system(size: 14, weight: .semibold))
-                        HStack {
-                            Text("BIB:").fontWeight(.light)
-                            Text("M12345").fontWeight(.medium)
-                        }
-                        .font(.system(size: 11))
-                        Text("Aug 12, 04:30 WIB")
-                            .font(.system(size: 11, weight: .light))
-                    }
-                    .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            // aksi hapus di sini
-                        } label: {
-                            Label("Hapus", systemImage: "trash")
-                        }
-                    }
-                } header: {
-                    Text("Upcoming")
-                        .font(.system(size: 11, weight: .medium))
-                        .textCase(nil)
+                if viewModel.upcomingEvents.isEmpty {
+                    emptyUpcomingSection
                 }
-                Section {
-                    VStack(alignment: .leading) {
-                        Text("BTN JAKIM 2027")
-                            .font(.system(size: 14, weight: .semibold))
-                        HStack {
-                            Text("BIB:").fontWeight(.light)
-                            Text("M12345").fontWeight(.medium)
-                        }
-                        .font(.system(size: 11))
-                        Text("Aug 12, 04:30 WIB")
-                            .font(.system(size: 11, weight: .light))
-                    }
-                    .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            // aksi hapus di sini
-                        } label: {
-                            Label("Hapus", systemImage: "trash")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("BTN JAKIM 2027")
-                            .font(.system(size: 14, weight: .semibold))
-                        HStack {
-                            Text("BIB:")
-                                .fontWeight(.light)
-                            Text("M12345")
-                                .fontWeight(.medium)
-                        }
-                        .font(.system(size: 11))
-                        Text("Aug 12, 04:30 WIB")
-                            .font(.system(size: 11, weight: .light))
-                    }
-                    .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            // aksi hapus di sini
-                        } label: {
-                            Label("Hapus", systemImage: "trash")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("BTN JAKIM 2027")
-                            .font(.system(size: 14, weight: .semibold))
-                        HStack {
-                            Text("BIB:").fontWeight(.light)
-                            Text("M12345").fontWeight(.medium)
-                        }
-                        .font(.system(size: 11))
-                        Text("Aug 12, 04:30 WIB")
-                            .font(.system(size: 11, weight: .light))
-                    }
-                    .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            // aksi hapus di sini
-                        } label: {
-                            Label("Hapus", systemImage: "trash")
-                        }
-                    }
-                } header: {
-                    Text("Past")
-                        .font(.system(size: 11, weight: .medium))
-                        .textCase(nil)
+                else {
+                    eventSection(
+                        title: "Upcoming",
+                        events: viewModel.upcomingEvents
+                    )
+                }
+
+                if !viewModel.pastEvents.isEmpty {
+                    eventSection(
+                        title: "Past",
+                        events: viewModel.pastEvents
+                    )
                 }
             }
         }
     }
+    
+    private func eventSection(
+        title: String,
+        events: [Event]
+    ) -> some View {
+        
+        Section {
+            ForEach(events) { event in
+                if let runner = viewModel.runner(for: event) {
+                    EventRowView(
+                        event: event,
+                        runner: runner
+                    )
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            Task {
+                                await viewModel.remove(event)
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                }
+            }
+            
+        } header: {
+            Text(title)
+                .textCase(nil)
+        }
+    }
+    
+    private var addIconButton: some View {
+        Button {
+            showAddEvent = true
+        } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 14, weight: .semibold))
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .frame(width: 30, height: 30)
+        .padding(.trailing, 8)
+    }
+    
+    private var emptyState: some View {
+        VStack {
+            Spacer()
+            Text("No Events")
+                .font(.system(size: 14, weight: .medium))
+            Spacer()
+            addEventButton
+        }
+    }
+    
+    private var emptyUpcomingSection: some View {
+        Section {
+            Text("No Events")
+                .font(.system(size: 14, weight: .medium))
+                .frame(maxWidth: .infinity)
+            
+            addEventButton
+                .frame(maxWidth: .infinity)
+        }
+        .listRowBackground(Color.clear)
+    }
+    
+    private var addEventButton: some View {
+        LargeButtonView(action: {
+            showAddEvent = true
+        }, title: "Add Event")
+    }
 }
-#Preview {
-    LandingPageView()
+
+#Preview("Empty") {
+    let vm = LandingPageViewModel()
+    return LandingPageView(
+        viewModel: vm,
+        shouldFetch: false
+    )
 }
+
+#Preview("With Events") {
+    let vm = LandingPageViewModel()
+    let eventId = UUID()
+    vm.events = [
+        Event(
+            id: eventId,
+            name: "BTN Jakim 2027",
+            location: "Jakarta",
+            startTime: "2027-08-12T05:00:00.000+00:00",
+            endTime: nil,
+            createdAt: nil,
+            code: "BTN123"
+        ),
+        Event(
+            id: eventId,
+            name: "JRF 2027",
+            location: "Jakarta",
+            startTime: "2024-05-01T05:00:00.000+00:00",
+            endTime: nil,
+            createdAt: nil,
+            code: "JRF27"
+        )
+    ]
+    
+    vm.runners = [
+        Runner(
+            id: UUID(),
+            eventId: eventId,
+            name: "Brian Chang",
+            bibNumber: "M12345",
+            age: 21,
+            gender: "Male",
+            currentRiskLevel: "Low",
+            lastUpdated: nil,
+            createdAt: nil,
+            registeredBy: nil
+        )
+    ]
+    
+    return LandingPageView(
+        viewModel: vm,
+        shouldFetch: false
+    )
+}
+
+//#Preview("Loading") {
+//    let vm = LandingPageViewModel()
+//    vm.isLoading = true
+//
+//    return LandingPageView(viewModel: vm)
+//}
+
+//#Preview("Empty") {
+//    let vm = LandingPageViewModel()
+//
+//    return LandingPageView(viewModel: vm)
+//}
+
+//#Preview("With Events") {
+//    let vm = LandingPageViewModel()
+//
+//    let eventId = UUID()
+//
+//    vm.events = [
+//        Event(
+//            id: eventId,
+//            name: "BTN Jakim 2027",
+//            location: "Jakarta",
+//            startTime: nil,
+//            endTime: nil,
+//            createdAt: nil
+//        )
+//    ]
+//
+//    vm.runners = [
+//        Runner(
+//            id: UUID(),
+//            eventId: eventId,
+//            name: "Brian Chang",
+//            bibNumber: "M12345",
+//            age: 21,
+//            gender: "Male",
+//            currentRiskLevel: "Low",
+//            lastUpdated: nil,
+//            createdAt: nil
+//        )
+//    ]
+//
+//    return LandingPageView(viewModel: vm)
+//}
+
+//#Preview("Multiple Events") {
+//    let vm = LandingPageViewModel()
+//
+//    let event1 = UUID()
+//    let event2 = UUID()
+//
+//    vm.events = [
+//        Event(
+//            id: event1,
+//            name: "BTN Jakim 2027",
+//            location: "Jakarta",
+//            startTime: nil,
+//            endTime: nil,
+//            createdAt: nil
+//        ),
+//        Event(
+//            id: event2,
+//            name: "Bandung Marathon",
+//            location: "Bandung",
+//            startTime: nil,
+//            endTime: nil,
+//            createdAt: nil
+//        )
+//    ]
+//
+//    vm.runners = [
+//        Runner(
+//            id: UUID(),
+//            eventId: event1,
+//            name: "Brian",
+//            bibNumber: "M12345",
+//            age: 21,
+//            gender: "Male",
+//            currentRiskLevel: "Low",
+//            lastUpdated: nil,
+//            createdAt: nil
+//        ),
+//        Runner(
+//            id: UUID(),
+//            eventId: event2,
+//            name: "Nabiel",
+//            bibNumber: "H67890",
+//            age: 25,
+//            gender: "Male",
+//            currentRiskLevel: "Medium",
+//            lastUpdated: nil,
+//            createdAt: nil
+//        )
+//    ]
+//
+//    return LandingPageView(viewModel: vm)
+//}
+

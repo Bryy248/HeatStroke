@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific files
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad
+
+# Xcode build files
+DerivedData/
+build/
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# Local config / secrets
+Config/SupabaseConfig.plist
+Config/Secrets.plist
+*.local.xcconfig
+.env
+.env.local
