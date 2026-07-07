@@ -8,10 +8,7 @@
 import SwiftUI
 
 struct MarathonCodeView: View {
-    @State private var code: String = ""
-    @State private var isValid: Bool = true
-    @State private var goToVerify: Bool = false
-    @State private var showKeyboard: Bool = false
+    @State private var viewModel = MarathonCodeViewModel()
     
     var body: some View {
         VStack (alignment: .center){
@@ -28,29 +25,20 @@ struct MarathonCodeView: View {
                 .padding(.bottom, 14)
                 .foregroundStyle(.gray)
             
-            Button {
-                showKeyboard = true
-            } label: {
-                Text("Tap to enter")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 152, height: 42)
-            }
-            .background(.color1)
-            .clipShape(RoundedRectangle(cornerRadius: 21))
-            .buttonStyle(.plain)
+            LargeButtonView(action: {
+                viewModel.showKeyboard = true
+            }, title: "Tap to enter")
         }
-        .sheet(isPresented: $showKeyboard) {
-            TextField("Add Code", text: $code)
+        .sheet(isPresented: $viewModel.showKeyboard) {
+            TextField("Add Code", text: $viewModel.code)
                 .font(.system(size: 16, weight: .medium))
                 .multilineTextAlignment(.center)
                 .onSubmit {
-                    showKeyboard = false
-                    goToVerify = true
+                    viewModel.submit()
                 }
         }
-        .navigationDestination(isPresented: $goToVerify) {
-            VerifyView(code: code)
+        .navigationDestination(isPresented: $viewModel.goToVerify) {
+            VerifyView(code: viewModel.code)
         }
     }
 }

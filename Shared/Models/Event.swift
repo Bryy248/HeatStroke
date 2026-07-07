@@ -14,6 +14,7 @@ struct Event: Codable, Identifiable {
     let startTime: String?
     let endTime: String?
     let createdAt: String?
+    let code: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -22,5 +23,6 @@ struct Event: Codable, Identifiable {
         case startTime = "start_time"
         case endTime = "end_time"
         case createdAt = "created_at"
+        case code = "code"
     }
 }
