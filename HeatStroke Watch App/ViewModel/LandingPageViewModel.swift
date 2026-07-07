@@ -12,94 +12,98 @@ import Supabase
 
 @Observable
 final class LandingPageViewModel {
-
+    
     var events: [Event] = []
     var runners: [Runner] = []
     var isLoading = false
-
+    
     var hasEvents: Bool {
         !events.isEmpty
     }
-
-    // sementara di-comment dulu karena belum ada event date
-//    var upcomingEvents: [Event] {
-//        events
-//            .filter { event in
-//                guard let date = event.startDate else {
-//                    return false
-//                }
-//                return date >= Date()
-//            }
-//            .sorted {
-//                $0.startDate! < $1.startDate!
-//            }
-//    }
-
-//    var pastEvents: [Event] {
-//        events
-//            .filter { event in
-//                guard let date = event.startDate else {
-//                    return false
-//                }
-//                return date < Date()
-//            }
-//            .sorted {
-//                $0.startDate! > $1.startDate!
-//            }
-//    }
+    
+    private func startDate(of event: Event) -> Date? {
+        guard let startTime = event.startTime else { return nil }
+        return Self.isoFormatter.date(from: startTime)
+    }
+    
+    private static let isoFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
     
     var upcomingEvents: [Event] {
         events
+            .filter { event in
+                guard let date = startDate(of: event) else { return false }
+                return date >= Date()
+            }
+            .sorted { startDate(of: $0)! < startDate(of: $1)! }
     }
-
+    
     var pastEvents: [Event] {
-        []
+        events
+            .filter { event in
+                guard let date = startDate(of: event) else { return false }
+                return date < Date()
+            }
+            .sorted { startDate(of: $0)! > startDate(of: $1)! }
     }
-
+    
     @MainActor
     func fetchEvents() async {
         isLoading = true
-
+        defer { isLoading = false }
+        
+        guard let uid = SupabaseManager.client.auth.currentUser?.id else {
+            events = []; runners = []
+            return
+        }
+        
         do {
-            events = try await SupabaseManager.client
-                .from("events")
-                .select()
-                .execute()
-                .value
-
+            // hanya runner yang sudah di-claim user ini
             runners = try await SupabaseManager.client
                 .from("runners")
                 .select()
+                .eq("registered_by", value: uid)
                 .execute()
                 .value
-
+            
+            // event diturunkan dari runner tsb
+            let eventIds = runners.map { $0.eventId }
+            guard !eventIds.isEmpty else {
+                events = []
+                return
+            }
+            
+            events = try await SupabaseManager.client
+                .from("events")
+                .select()
+                .in("id", values: eventIds)
+                .execute()
+                .value
         }
         catch {
             print(error)
-            events = []
-            runners = []
+            events = []; runners = []
         }
-
-        isLoading = false
     }
-
+    
     @MainActor
-    func delete(_ event: Event) async {
+    func remove(_ event: Event) async {
+        guard let uid = SupabaseManager.client.auth.currentUser?.id else { return }
         do {
             try await SupabaseManager.client
-                .from("events")
-                .delete()
-                .eq("id", value: event.id)
+                .from("runners")
+                .update(["registered_by": nil as UUID?])
+                .eq("registered_by", value: uid)
+                .eq("event_id", value: event.id)
                 .execute()
-
-            events.removeAll {
-                $0.id == event.id
-            }
-
+            
+            events.removeAll { $0.id == event.id }
+            runners.removeAll { $0.eventId == event.id }
         }
-        catch {
-            print(error)
-        }
+        catch { print(error) }
     }
     
     func runner(for event: Event) -> Runner? {

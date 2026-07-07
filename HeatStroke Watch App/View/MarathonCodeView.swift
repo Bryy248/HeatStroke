@@ -25,9 +25,9 @@ struct MarathonCodeView: View {
                 .padding(.bottom, 14)
                 .foregroundStyle(.gray)
             
-            LargeButtonView {
+            LargeButtonView(action: {
                 viewModel.showKeyboard = true
-            }
+            }, title: "Tap to enter")
         }
         .sheet(isPresented: $viewModel.showKeyboard) {
             TextField("Add Code", text: $viewModel.code)

@@ -9,9 +9,10 @@ import SwiftUI
 
 struct LargeButtonView: View {
     let action: () -> Void
+    let title: String
     var body: some View {
         Button(action:action) {
-            Text("Add Event")
+            Text(title)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.black)
         }

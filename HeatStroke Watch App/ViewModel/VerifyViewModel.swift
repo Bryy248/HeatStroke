@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Observation
+internal import PostgREST
+import Supabase
 
 @Observable
 final class VerifyViewModel {
@@ -15,31 +17,40 @@ final class VerifyViewModel {
         case found(Event)
         case notFound
     }
-
+    
     private(set) var state: State = .loading
     let code: String
-
+    
     init(code: String) {
         self.code = code
     }
-
+    
     @MainActor
     func verify() async {
         state = .loading
-
-        // simulasi loading, hapus kalau udah pakai Supabase asli
-        try? await Task.sleep(for: .milliseconds(400))
-
-        // TODO: ganti blok ini dgn query asli ke Supabase
-        // (mis. .from("events").eq("code", value: code))
-        if let event = Self.mockEvents[code.uppercased()] {
-            state = .found(event)
+        
+        do {
+            // cari event yang code-nya cocok
+            let events: [Event] = try await SupabaseManager.client
+                .from("events")
+                .select()
+                .eq("code", value: code)
+                .execute()
+                .value
+            
+            if let event = events.first {
+                state = .found(event)
+            }
+            else {
+                state = .notFound
+            }
         }
-        else {
+        catch {
+            print(error)
             state = .notFound
         }
     }
-
+    
     // helper display: startTime/location masih optional & belum diformat,
     // jadi sementara ditangani di sini
     func dateLocationText(for event: Event) -> String {
@@ -47,16 +58,4 @@ final class VerifyViewModel {
         let location = event.location ?? "-"
         return "\(date) • \(location)"
     }
-
-    // data dummy pengganti backend
-    private static let mockEvents: [String: Event] = [
-        "BTN123": Event(
-            id: UUID(),
-            name: "BTN JAKIM 2027",
-            location: "Jakarta, Indonesia",
-            startTime: "Aug 12, 2027 05:00 WIB",
-            endTime: nil,
-            createdAt: nil
-        )
-    ]
 }

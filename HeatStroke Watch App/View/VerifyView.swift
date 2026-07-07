@@ -32,7 +32,9 @@ struct VerifyView: View {
             await viewModel.verify()
         }
         .navigationDestination(isPresented: $goToIdentityView) {
-            IdentityView()
+            if case .found(let event) = viewModel.state {
+                    IdentityView(event: event)
+            }
         }
     }
     
@@ -111,12 +113,7 @@ struct VerifyView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.gray)
                 
-                Button("Try Again") {
-                    dismiss()
-                }
-                .buttonStyle(.bordered)
-                .padding(.top, 16)
-                .frame(width: 168, height: 52)
+                FailButton()
             }
             .padding(.horizontal, 16)
         }
