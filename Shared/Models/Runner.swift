@@ -17,6 +17,7 @@ struct Runner: Codable, Identifiable {
     let currentRiskLevel: String?
     let lastUpdated: String?
     let createdAt: String?
+    let registeredBy: UUID?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -28,5 +29,6 @@ struct Runner: Codable, Identifiable {
         case currentRiskLevel = "current_risk_level"
         case lastUpdated = "last_updated"
         case createdAt = "created_at"
+        case registeredBy = "registered_by"
     }
 }

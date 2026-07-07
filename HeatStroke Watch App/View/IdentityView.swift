@@ -9,28 +9,27 @@ import SwiftUI
 
 struct IdentityView: View {
     
-    @State private var bib: String = ""
-    @State private var birthDate: Date = Date()
-    @State private var hasBirthDate = false
-    @State private var showBIBKeyboard = false
-    @State private var showDatePicker = false
-    @State private var goToConfirm = false
+    @State private var viewModel: IdentityViewModel
+    
+    init(event: Event) {
+            _viewModel = State(initialValue: IdentityViewModel(event: event))
+        }
     
     var body: some View {
         NavigationStack {
             List {
-                Text("BTN JAKIM 2027")
+                Text(viewModel.eventName)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.color1)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)
                 
                 Button {
-                    showBIBKeyboard = true
+                    viewModel.showBIBKeyboard = true
                 } label: {
-                    Text(bib.isEmpty ? "BIB Number" : bib)
+                    Text(viewModel.bib.isEmpty ? "BIB Number" : viewModel.bib)
                         .font(.system(size: 16, weight: .regular))
-                        .foregroundStyle(bib.isEmpty ? .gray : .white)
+                        .foregroundStyle(viewModel.bib.isEmpty ? .gray : .white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: 30)
                 }
@@ -39,11 +38,11 @@ struct IdentityView: View {
                 .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
                 
                 Button {
-                    showDatePicker = true
+                    viewModel.showDatePicker = true
                 } label: {
-                    Text(hasBirthDate ? formatted(birthDate) : "Birth Date")
+                    Text(viewModel.hasBirthDate ? formatted(viewModel.birthDate) : "Birth Date")
                         .font(.system(size: 16, weight: .regular))
-                        .foregroundStyle(hasBirthDate ? .white : .gray)
+                        .foregroundStyle(viewModel.hasBirthDate ? .white : .gray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: 30)
                 }
@@ -52,8 +51,7 @@ struct IdentityView: View {
                 .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
                 
                 Button {
-                    // Aksi Add Event
-                    goToConfirm = true
+                    viewModel.goToConfirm = true
                 } label: {
                     Text("Confirm")
                         .font(.system(size: 14, weight: .semibold))
@@ -64,26 +62,30 @@ struct IdentityView: View {
                 .listRowBackground(Color.clear)
                 .padding(.top, 8)
             }
-            .sheet(isPresented: $showBIBKeyboard) {
-                TextField("BIB Number", text: $bib)
+            .sheet(isPresented: $viewModel.showBIBKeyboard) {
+                TextField("BIB Number", text: $viewModel.bib)
                     .font(.system(size: 16, weight: .regular))
-                    .onSubmit { showBIBKeyboard = false }
+                    .onSubmit { viewModel.showBIBKeyboard = false }
             }
-            .sheet(isPresented: $showDatePicker) {
+            .sheet(isPresented: $viewModel.showDatePicker) {
                 VStack {
-                    DatePicker("Birth Date", selection: $birthDate, in: ...Date(),
+                    DatePicker("Birth Date", selection: $viewModel.birthDate, in: ...Date(),
                                displayedComponents: .date)
                         .datePickerStyle(.wheel)
                     Button("Done") {
-                        hasBirthDate = true
-                        showDatePicker = false
+                        viewModel.hasBirthDate = true
+                        viewModel.showDatePicker = false
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.color1)
                 }
             }
-            .navigationDestination(isPresented: $goToConfirm) {
-                IdentityVerifyView(name: "Akbar")
+            .navigationDestination(isPresented: $viewModel.goToConfirm) {
+                IdentityVerifyView(
+                    event: viewModel.event,
+                    bib: viewModel.bib,
+                    birthDate: viewModel.birthDate
+                )
             }
         }
     }
@@ -97,5 +99,15 @@ struct IdentityView: View {
 }
 
 #Preview {
-    IdentityView()
+    IdentityView(
+        event: Event(
+            id: UUID(),
+            name: "BTN JAKIM 2027",
+            location: "Jakarta, Indonesia",
+            startTime: nil,
+            endTime: nil,
+            createdAt: nil,
+            code: "BTN123"
+        )
+    )
 }

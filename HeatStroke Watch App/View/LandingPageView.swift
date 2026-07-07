@@ -51,44 +51,28 @@ struct LandingPageView: View {
     }
     
     @ViewBuilder
-    // sementara di-comment dulu karena belum ada event date
-    //    private var content: some View {
-    //        if viewModel.upcomingEvents.isEmpty &&
-    //            viewModel.pastEvents.isEmpty {
-    //
-    //            emptyState
-    //        }
-    //        else {
-    //            List {
-    //                if viewModel.upcomingEvents.isEmpty {
-    //                    emptyUpcomingSection
-    //                }
-    //                else {
-    //                    eventSection(
-    //                        title: "Upcoming",
-    //                        events: viewModel.upcomingEvents
-    //                    )
-    //                }
-    //
-    //                if !viewModel.pastEvents.isEmpty {
-    //                    eventSection(
-    //                        title: "Past",
-    //                        events: viewModel.pastEvents
-    //                    )
-    //                }
-    //            }
-    //        }
-    //    }
     private var content: some View {
-        if viewModel.events.isEmpty {
+        if viewModel.upcomingEvents.isEmpty && viewModel.pastEvents.isEmpty {
             emptyState
         }
         else {
             List {
-                eventSection(
-                    title: "Events",
-                    events: viewModel.events
-                )
+                if viewModel.upcomingEvents.isEmpty {
+                    emptyUpcomingSection
+                }
+                else {
+                    eventSection(
+                        title: "Upcoming",
+                        events: viewModel.upcomingEvents
+                    )
+                }
+
+                if !viewModel.pastEvents.isEmpty {
+                    eventSection(
+                        title: "Past",
+                        events: viewModel.pastEvents
+                    )
+                }
             }
         }
     }
@@ -108,7 +92,7 @@ struct LandingPageView: View {
                     .swipeActions {
                         Button(role: .destructive) {
                             Task {
-                                await viewModel.delete(event)
+                                await viewModel.remove(event)
                             }
                         } label: {
                             Label("Delete", systemImage: "trash")
@@ -159,15 +143,9 @@ struct LandingPageView: View {
     }
     
     private var addEventButton: some View {
-        Button {
+        LargeButtonView(action: {
             showAddEvent = true
-        } label: {
-            Text("Add Event")
-                .font(.system(size: 14, weight: .semibold))
-        }
-        .frame(width: 152, height: 42)
-        .buttonStyle(.borderedProminent)
-        .tint(.color1)
+        }, title: "Add Event")
     }
 }
 
@@ -187,17 +165,19 @@ struct LandingPageView: View {
             id: eventId,
             name: "BTN Jakim 2027",
             location: "Jakarta",
-            startTime: nil,
+            startTime: "2027-08-12T05:00:00.000+00:00",
             endTime: nil,
-            createdAt: nil
+            createdAt: nil,
+            code: "BTN123"
         ),
         Event(
             id: eventId,
             name: "JRF 2027",
             location: "Jakarta",
-            startTime: nil,
+            startTime: "2024-05-01T05:00:00.000+00:00",
             endTime: nil,
-            createdAt: nil
+            createdAt: nil,
+            code: "JRF27"
         )
     ]
     
@@ -211,7 +191,8 @@ struct LandingPageView: View {
             gender: "Male",
             currentRiskLevel: "Low",
             lastUpdated: nil,
-            createdAt: nil
+            createdAt: nil,
+            registeredBy: nil
         )
     ]
     

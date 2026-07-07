@@ -22,7 +22,8 @@ final class DummyDataService {
                 location: "Jakarta",
                 startTime: "2026-07-20T06:00:00+07:00",
                 endTime: "2026-07-20T10:00:00+07:00",
-                createdAt: nil
+                createdAt: nil,
+                code: "BTN123"
             )
 
             try await client
@@ -40,7 +41,8 @@ final class DummyDataService {
                     gender: "male",
                     currentRiskLevel: "safe",
                     lastUpdated: nil,
-                    createdAt: nil
+                    createdAt: nil,
+                    registeredBy: nil
                 ),
                 Runner(
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!,
@@ -51,7 +53,8 @@ final class DummyDataService {
                     gender: "male",
                     currentRiskLevel: "caution",
                     lastUpdated: nil,
-                    createdAt: nil
+                    createdAt: nil,
+                    registeredBy: nil
                 ),
                 Runner(
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222223")!,
@@ -62,7 +65,8 @@ final class DummyDataService {
                     gender: "male",
                     currentRiskLevel: "danger",
                     lastUpdated: nil,
-                    createdAt: nil
+                    createdAt: nil,
+                    registeredBy: nil
                 )
             ]
 
