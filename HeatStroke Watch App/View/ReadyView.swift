@@ -26,16 +26,7 @@ struct ReadyView: View {
                             .foregroundColor(.gray)
                     }
                 }
-                Button {
-                    isDetected = true
-                } label: {
-                    Text("Confirm")
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .frame(width: 168, height: 52)
-                .buttonStyle(.borderedProminent)
-                .tint(.color1)
-                .disabled(isLoading)
+                
             }
         } else {
             VStack(spacing: 25){
@@ -100,6 +91,7 @@ struct ReadyView: View {
                 Circle()
                     .stroke(.gray, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                     .opacity(0.3)
+                    .frame(width: 50, height: 50)
                 
                 Circle()
                     .trim(from: 0, to: 0.25) //jadi cuma muncul setengahnya
