@@ -11,6 +11,7 @@ import Combine
 struct WaitingView: View {
     
     @State private var offset: CGFloat = 200
+    @State private var navigateToReady = false
     
     //change to the time in database
     //(Just want to see if the timer work)
@@ -85,34 +86,42 @@ struct WaitingView: View {
                 .cornerRadius(7)
             }
         }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { //UNTUK SEMENTARA WAIT 3S buat lanjut ke running view
+                navigateToReady = true
+            }
+        }
+        .navigationDestination(isPresented: $navigateToReady) {
+            ReadyView()
+        }
     }
     
     //ini buat countdown juga (functionnya maybe bisa dipindahin nanti)
     private func updateCountdown() {
-            let now = Date.now
-            
-            guard now < targetDate else {
-                timeRemainingString = "Event Started!"
-                return
-            }
-            
-            let components = Calendar.current.dateComponents([.day, .hour, .minute], from: now, to: targetDate)
-            
-            let days = components.day ?? 0
-            let hours = components.hour ?? 0
-            let minutes = components.minute ?? 0
-            
-            timeRemainingString = String(format: "%02d : %02d : %02d", days, hours, minutes)
+        let now = Date.now
+        
+        guard now < targetDate else {
+            timeRemainingString = "Event Started!"
+            return
         }
+        
+        let components = Calendar.current.dateComponents([.day, .hour, .minute], from: now, to: targetDate)
+        
+        let days = components.day ?? 0
+        let hours = components.hour ?? 0
+        let minutes = components.minute ?? 0
+        
+        timeRemainingString = String(format: "%02d : %02d : %02d", days, hours, minutes)
+    }
     
     //ini biar tulisannya bisa jalan
     struct MarqueeText: View {
         let text: String
         let font: Font
-
+        
         @State private var textWidth: CGFloat = 0
         @State private var offset: CGFloat = 0
-
+        
         var body: some View {
             GeometryReader { geo in
                 Text(text)
@@ -130,7 +139,7 @@ struct WaitingView: View {
                     .offset(x: offset)
                     .onAppear {
                         let distance = geo.size.width + textWidth
-
+                        
                         withAnimation(
                             .linear(duration: Double(distance / 30))
                             .repeatForever(autoreverses: false)
