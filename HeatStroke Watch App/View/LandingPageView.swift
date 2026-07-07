@@ -159,15 +159,9 @@ struct LandingPageView: View {
     }
     
     private var addEventButton: some View {
-        Button {
+        LargeButtonView {
             showAddEvent = true
-        } label: {
-            Text("Add Event")
-                .font(.system(size: 14, weight: .semibold))
         }
-        .frame(width: 152, height: 42)
-        .buttonStyle(.borderedProminent)
-        .tint(.color1)
     }
 }
 

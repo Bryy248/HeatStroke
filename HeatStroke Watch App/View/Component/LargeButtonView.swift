@@ -8,11 +8,19 @@
 import SwiftUI
 
 struct LargeButtonView: View {
+    let action: () -> Void
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button(action:action) {
+            Text("Add Event")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.black)
+        }
+        .frame(width: 152, height: 42)
+        .buttonStyle(.borderedProminent)
+        .tint(.color1)
     }
 }
 
-#Preview {
-    LargeButtonView()
-}
+//#Preview {
+//    LargeButtonView()
+//}
