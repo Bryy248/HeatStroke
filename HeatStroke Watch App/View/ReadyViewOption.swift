@@ -8,128 +8,136 @@
 import SwiftUI
 
 struct ReadyViewOption: View {
-    @State var isDetected: Bool = true
-    @State var isLoading: Bool = false
+    @StateObject var vm: ReadyViewModel
         
     var body: some View {
-        if !isDetected {
-            VStack(spacing: 10){
-                LoadingSpinner()
-                    .tint(.color1)
-                VStack(spacing: 2){
-                    Text("Connecting to sensor")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                    Text("Looking for nearest station")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.gray)
+        Group {
+            if !vm.isDetected {
+                VStack(spacing: 10){
+                    LoadingSpinner()
+                        .tint(.color1)
+                    VStack(spacing: 2){
+                        Text("Connecting to sensor")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Looking for nearest station")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.gray)
+                    }
                 }
             }
-        } else {
-            ZStack {
-                //layer terluar (ambient)
-                // LAYER 1: Outline
-                Circle()
-                    .trim(from: 0.07, to: 0.93)
-                    .stroke(
-                        Color(red: 0.05, green: 0.20, blue: 0.30),
-                        style: StrokeStyle(lineWidth: 24, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: -90))
-                    .frame(width: 170, height: 170)
-                
-                // LAYER 2: kosongannya
-                Circle()
-                    .trim(from: 0.07, to: 0.93)
-                    .stroke(
-                        Color(.black),
-                        style: StrokeStyle(lineWidth: 22, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: -90))
-                    .frame(width: 170, height: 170)
-                
-                // LAYER 3: progressannya
-                Circle()
-                    .trim(from: 0.06, to: 0.583)
-                    .stroke(
-                        Color(.humid),
-                        style: StrokeStyle(lineWidth: 22, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: 35))
-                    .frame(width: 170, height: 170)
-                
-                HStack(alignment: .lastTextBaseline, spacing: 2) {
-                    Text("78")
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundColor(.humid)
-                        .offset(x: 0, y: -83)
+            else {
+                ZStack {
+                    //layer terluar (ambient)
+                    // LAYER 1: Outline
+                    Circle()
+                        .trim(from: 0.07, to: 0.93)
+                        .stroke(
+                            Color(red: 0.05, green: 0.20, blue: 0.30),
+                            style: StrokeStyle(lineWidth: 24, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: -90))
+                        .frame(width: 170, height: 170)
                     
-                    Text("%")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.humid)
-                        .offset(x: 0, y: -83)
+                    // LAYER 2: kosongannya
+                    Circle()
+                        .trim(from: 0.07, to: 0.93)
+                        .stroke(
+                            Color(.black),
+                            style: StrokeStyle(lineWidth: 22, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: -90))
+                        .frame(width: 170, height: 170)
+                    
+                    // LAYER 3: progressannya
+                    Circle()
+                        .trim(from: 0.06, to: vm.humidityTrimEnd)
+                        .stroke(
+                            Color(.humid),
+                            style: StrokeStyle(lineWidth: 22, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: 35))
+                        .frame(width: 170, height: 170)
+                    
+                    HStack(alignment: .lastTextBaseline, spacing: 2) {
+                        Text("\(vm.humidity)")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundColor(.humid)
+                            .offset(x: 0, y: -83)
+                        
+                        Text("%")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.humid)
+                            .offset(x: 0, y: -83)
+                    }
+                    
+                    Image(systemName: "humidity.fill")
+                        .foregroundColor(.black)
+                        .font(Font.system(size: 9.6))
+                        .offset(x: -37, y: -76)
+                    
+                    //layer kedua (suhu)
+                    // LAYER 1: Outline
+                    Circle()
+                        .trim(from: 0.07, to: 0.92)
+                        .stroke(
+                            Color(.orangeHigh.opacity(0.3)),
+                            style: StrokeStyle(lineWidth: 24, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: -90))
+                        .frame(width: 110, height: 110)
+                    
+                    // LAYER 2: kosongannya
+                    Circle()
+                        .trim(from: 0.07, to: 0.92)
+                        .stroke(
+                            Color(.black),
+                            style: StrokeStyle(lineWidth: 22, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: -90))
+                        .frame(width: 110, height: 110)
+                    
+                    
+                    // LAYER 3: progressannya
+                    Circle()
+                        .trim(from: 0.07, to: vm.temperatureTrimEnd)
+                        .stroke(
+                            Color(.orange),
+                            style: StrokeStyle(lineWidth: 22, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: 35))
+                        .frame(width: 110, height: 110)
+                    
+                    Text("\(vm.temperature)°")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.orange)
+                        .offset(x: 0, y: -53)
+                    
+                    Image(systemName: "thermometer.variable")
+                        .foregroundColor(.black)
+                        .font(Font.system(size: 8.64))
+                        .offset(x: -23, y: -50)
+                    
+                    Button {
+                        vm.goToRunning = true
+                    } label: {
+                        Text("Start")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.black)
+                            .frame(width: 74, height: 74)
+                    }
+                    .background(.color1)
+                    .clipShape(Circle())
+                    .buttonStyle(.plain)
                 }
-                
-                Image(systemName: "humidity.fill")
-                    .foregroundColor(.black)
-                    .font(Font.system(size: 9.6))
-                    .offset(x: -37, y: -76)
-                
-                //layer kedua (suhu)
-                // LAYER 1: Outline
-                Circle()
-                    .trim(from: 0.07, to: 0.92)
-                    .stroke(
-                        Color(.orangeHigh.opacity(0.3)),
-                        style: StrokeStyle(lineWidth: 24, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: -90))
-                    .frame(width: 110, height: 110)
-                
-                // LAYER 2: kosongannya
-                Circle()
-                    .trim(from: 0.07, to: 0.92)
-                    .stroke(
-                        Color(.black),
-                        style: StrokeStyle(lineWidth: 22, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: -90))
-                    .frame(width: 110, height: 110)
-                
-                
-                // LAYER 3: progressannya
-                Circle()
-                    .trim(from: 0.06, to: 0.575)
-                    .stroke(
-                        Color(.orange),
-                        style: StrokeStyle(lineWidth: 22, lineCap: .round)
-                    )
-                    .rotationEffect(Angle(degrees: 35))
-                    .frame(width: 110, height: 110)
-                
-                Text("32°")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.orange)
-                    .offset(x: 0, y: -53)
-                
-                Image(systemName: "thermometer.variable")
-                    .foregroundColor(.black)
-                    .font(Font.system(size: 8.64))
-                    .offset(x: -23, y: -50)
-                
-                Button {
-                    //connect ke running view
-                } label: {
-                    Text("Start")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.black)
-                        .frame(width: 74, height: 74)
-                }
-                .background(.color1)
-                .clipShape(Circle())
-                .buttonStyle(.plain)
             }
         }
+        .onAppear { vm.start() }
+        .onDisappear { vm.stop() }
+        .fullScreenCover(isPresented: $vm.goToRunning) {
+                RunningView()
+                .toolbar(.hidden)
+            }
     }
     
     struct LoadingSpinner: View {
@@ -161,5 +169,5 @@ struct ReadyViewOption: View {
 }
 
 #Preview {
-    ReadyViewOption()
+    ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
 }
