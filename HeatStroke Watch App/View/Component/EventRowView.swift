@@ -22,10 +22,10 @@ struct EventRowView: View {
                 Text(runner.bibNumber)
                     .fontWeight(.medium)
             }
-            .font(.system(size: 11))
+            .font(.system(size: 12))
  
 //            Text(event.formattedDate)
-//                .font(.system(size: 11, weight: .light))
+//                .font(.system(size: 12, weight: .light))
         }
         .listRowInsets(EdgeInsets(top: 11, leading: 11, bottom: 11, trailing: 11))
     }
