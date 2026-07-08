@@ -12,6 +12,7 @@ struct WaitingView: View {
     
     @State private var offset: CGFloat = 200
     @State private var navigateToReady = false
+    @State private var showInfo = false
     
     //change to the time in database
     //(Just want to see if the timer work)
@@ -30,69 +31,84 @@ struct WaitingView: View {
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        VStack(spacing: 16){
-            VStack(spacing: 0){
-                Text("You Are Connected")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.white)
-                Text("BTN JAKIM 2027") //placeholder nama event
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.color1)
-            }
-            
-            VStack(alignment: .center, spacing: -5){
-                Text(timeRemainingString)
-                    .font(.system(size: 32, weight: .bold))
-                HStack(spacing: 32){
-                    Text("days")
+        NavigationStack {
+            VStack(spacing: 16){
+                VStack(spacing: 0){
+                    Text("You Are Connected")
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.gray)
-                    Text("hrs")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.gray)
-                    Text("min")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white)
+                    Text("BTN JAKIM 2027") //placeholder nama event
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.color1)
                 }
-            }
-            .onAppear(perform: updateCountdown)
-            .onReceive(timer) { _ in updateCountdown()}
-            
-            HStack(spacing: 5) {
-                VStack(alignment: .center) {
-                    Text("BIB")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.gray)
-                    Text("M12345") //placeholder
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .frame(width: 75, height: 40)
-                .background(Color.inputBgcolor)
-                .cornerRadius(7)
                 
-                VStack(alignment: .center) {
-                    Text("Type")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.gray)
-                    MarqueeText(
-                        text: "Full Marathon",
-                        font: .system(size: 14, weight: .semibold)
-                    )
-                    .frame(width: 100)
+                VStack(alignment: .center, spacing: -5){
+                    Text(timeRemainingString)
+                        .font(.system(size: 32, weight: .bold))
+                    HStack(spacing: 32){
+                        Text("days")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.gray)
+                        Text("hrs")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.gray)
+                        Text("min")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.gray)
+                    }
                 }
-                .frame(width: 60, height: 30)
-                .frame(width: 75, height: 40)
-                .background(Color.inputBgcolor)
-                .cornerRadius(7)
+                .onAppear(perform: updateCountdown)
+                .onReceive(timer) { _ in updateCountdown()}
+                
+                HStack(spacing: 5) {
+                    VStack(alignment: .center) {
+                        Text("BIB")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.gray)
+                        Text("M12345") //placeholder
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .frame(width: 75, height: 40)
+                    .background(Color.inputBgcolor)
+                    .cornerRadius(7)
+                    
+                    VStack(alignment: .center) {
+                        Text("Type")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.gray)
+                        MarqueeText(
+                            text: "Full Marathon",
+                            font: .system(size: 14, weight: .semibold)
+                        )
+                        .frame(width: 100)
+                    }
+                    .frame(width: 60, height: 30)
+                    .frame(width: 75, height: 40)
+                    .background(Color.inputBgcolor)
+                    .cornerRadius(7)
+                }
             }
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { //UNTUK SEMENTARA WAIT 3S buat lanjut ke running view
-                navigateToReady = true
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { //UNTUK SEMENTARA WAIT 3S buat lanjut ke running view
+                    navigateToReady = true
+                }
             }
-        }
-        .navigationDestination(isPresented: $navigateToReady) {
-            ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
+            .navigationDestination(isPresented: $navigateToReady) {
+                ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showInfo = true
+                    } label: {
+                        Image(systemName: "info")
+                    }
+
+                }
+            }
+            .sheet(isPresented: $showInfo) {
+                ShowInfoView()
+            }
         }
     }
     
