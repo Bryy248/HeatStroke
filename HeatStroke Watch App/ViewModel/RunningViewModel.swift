@@ -183,6 +183,7 @@ final class RunningViewModel {
     
     func pauseTimer() {
         timerTask?.cancel()
+        isPaused = true
     }
     
     func resumeTimer() {
@@ -198,17 +199,20 @@ final class RunningViewModel {
                 elapsedSeconds = Int(Date().timeIntervalSince(currentStart))
             }
         }
+        isPaused = false
     }
     
-    func stopTimer(runner: Runner) {
+    func stopTimer() {
+        guard let runner = currentRunner else { return }
         timerTask?.cancel()
         let finishTime = Date()
-        
+        isFinished = true
+        stopMonitoring()
         Task {
             await saveFinishTime(runner: runner, finishTime: finishTime)
         }
     }
-    
+        
     //function untuk masukin data timer ke database
     @MainActor
     private func saveStartTime(runner: Runner, startTime: Date) async {
@@ -228,7 +232,7 @@ final class RunningViewModel {
         do {
             try await SupabaseManager.client
                 .from("runners")
-                .update(["finsih_time": ISO8601DateFormatter().string(from: finishTime)])
+                .update(["finish_time": ISO8601DateFormatter().string(from: finishTime)])
                 .eq("id", value: runner.id)
                 .execute()
         } catch {

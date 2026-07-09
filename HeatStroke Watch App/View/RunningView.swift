@@ -84,7 +84,8 @@ struct RunningView: View {
                     // Finish
                     VStack(spacing: 6) {
                         Button {
-                            // The race will stop -> goes to finished page
+                            viewModel.stopTimer()
+                            // TODO: navigate to finish page @bricang
                         } label: {
                             Image(systemName: "flag.pattern.checkered")
                                 .font(.system(size: 28, weight: .semibold))
@@ -103,8 +104,12 @@ struct RunningView: View {
                     // Pause / Resume
                     VStack(spacing: 6) {
                         Button {
-                            viewModel.isPaused.toggle()
-                            // paused
+                            if viewModel.isPaused {
+                                viewModel.resumeTimer()
+                            } else {
+                                viewModel.pauseTimer()
+                            }
+
                         } label: {
                             Image(systemName: viewModel.isPaused ? "play.fill" : "pause.fill")
                                 .font(.system(size: 28, weight: .semibold))
