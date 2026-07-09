@@ -46,6 +46,7 @@ struct LandingPageView: View {
         }
         .task {
             guard shouldFetch else { return } // untuk preview
+            NotificationManager.shared.sendTestNotification()
             await viewModel.fetchEvents()
         }
     }

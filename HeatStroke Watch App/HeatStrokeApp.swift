@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct HeatStroke_Watch_AppApp: App {
+    init() {
+            NotificationManager.shared.requestPermission()
+        }
     var body: some Scene {
         WindowGroup {
             LandingPageView()
