@@ -19,7 +19,7 @@ class HeatStrokeViewModel: ObservableObject {
     @Published var wristTemperature: Double?          // raw sensor, refresh ~1x/hari
     @Published var estimatedCoreTemperature: Double?   // hasil formula T_core
     @Published var heatIndex: Double?
-    @Published var riskLevel: RiskLevel = .normal
+    @Published var riskLevel: RiskLevel = .safe
     @Published var userAge: Int = 25
     @Published var currentCoordinate: CLLocationCoordinate2D?
 
