@@ -19,6 +19,8 @@ struct Runner: Codable, Identifiable {
     let lastUpdated: String?
     let createdAt: String?
     let registeredBy: UUID?
+    let startTime: Date?
+    let finishTime: Date?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -32,5 +34,7 @@ struct Runner: Codable, Identifiable {
         case lastUpdated = "last_updated"
         case createdAt = "created_at"
         case registeredBy = "registered_by"
+        case startTime = "start_time"
+        case finishTime = "finish_time"
     }
 }

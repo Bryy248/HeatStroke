@@ -52,7 +52,9 @@ final class DummyDataService {
                     currentRiskLevel: "safe",
                     lastUpdated: nil,
                     createdAt: nil,
-                    registeredBy: nil
+                    registeredBy: nil,
+                    startTime: nil,
+                    finishTime: nil
                 ),
                 Runner(
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!,
@@ -65,7 +67,9 @@ final class DummyDataService {
                     currentRiskLevel: "caution",
                     lastUpdated: nil,
                     createdAt: nil,
-                    registeredBy: nil
+                    registeredBy: nil,
+                    startTime: nil,
+                    finishTime: nil
                 ),
                 Runner(
                     id: UUID(uuidString: "22222222-2222-2222-2222-222222222223")!,
@@ -78,7 +82,9 @@ final class DummyDataService {
                     currentRiskLevel: "danger",
                     lastUpdated: nil,
                     createdAt: nil,
-                    registeredBy: nil
+                    registeredBy: nil,
+                    startTime: nil, 
+                    finishTime: nil
                 )
             ]
             
