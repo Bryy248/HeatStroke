@@ -9,6 +9,9 @@ import SwiftUI
 
 struct RunningView: View {
     
+    // TODO: JANGAN LUPA DIGANTI (untuk ngambil dr readyview)
+    //    let runner: Runner
+    
     @State private var viewModel = RunningViewModel()
     
     var body: some View {
@@ -62,7 +65,9 @@ struct RunningView: View {
                         .rotationEffect(.degrees(-90))
                 }
                 .frame(width: 131, height: 131)
-                .task {await viewModel.startCountdown()}
+                // TODO: JANGAN LUPA DIGANTI
+//                .task {await viewModel.startCountdown(runner: runner)}
+                .task {await viewModel.startCountdown(runner: Runner.dummy)}
             }
             Text("Start Monitoring")
                 .font(.system(size: 14, weight: .medium))
@@ -191,7 +196,7 @@ struct RunningView: View {
                         .buttonStyle(.plain)
                         
                     } else {
-                        Text(viewModel.timer)
+                        Text(viewModel.formattedTimer)
                             .font(.system(size: 16, weight: .light))
                             .foregroundColor(viewModel.isPaused ? .gray :.white)
                     }
@@ -217,7 +222,7 @@ struct RunningView: View {
                     }
                     
                     VStack(spacing: 5) {
-                        Text("\(viewModel.bodyTemperature)°")
+                        Text(String(format: "%.1f°", viewModel.bodyTemperature))
                             .font(.system(size: 24))
                             .foregroundColor(viewModel.condition.fontcolor)
 
@@ -235,7 +240,7 @@ struct RunningView: View {
                 HStack(spacing: 20) {
                     
                     VStack(spacing: 5) {
-                        Text("\(viewModel.ambientTemperature)°")
+                        Text(String(format:"%.1f°", viewModel.ambientTemperature))
                             .font(.system(size: 24))
                             .foregroundColor(viewModel.condition.fontcolor)
                         
@@ -251,7 +256,7 @@ struct RunningView: View {
                     
                     VStack(spacing: 5) {
                         HStack(alignment: .lastTextBaseline, spacing: 2) {
-                            Text("\(viewModel.humidity)")
+                            Text(String(format:"%.1f", viewModel.humidity))
                                 .font(.system(size: 24, weight: .medium))
                                 .foregroundColor(viewModel.condition.fontcolor)
                             
@@ -276,7 +281,45 @@ struct RunningView: View {
         }
     }
 
+// TODO: JANGAN LUPA DIHAPUS
+//DUMMY UNTUK RUN (NABIEL) - JANGAN LUPA DIHAPUS
+extension Runner {
+    static var dummy: Runner {
+        Runner(
+            id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
+            eventId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            name: "Bryan Chang",
+            bibNumber: "M1234",
+            age: 21,
+            birthDate: nil,
+            gender: "male",
+            currentRiskLevel: nil,
+            lastUpdated: nil,
+            createdAt: nil,
+            registeredBy: nil,
+            startTime: nil,
+            finishTime: nil
+        )
+    }
+}
+
 #Preview {
-    RunningView()
+    RunningView(
+//        runner: Runner(
+//            id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
+//            eventId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+//            name: "Bryan Chang",
+//            bibNumber: "M1234",
+//            age: 21,
+//            birthDate: nil,
+//            gender: "male",
+//            currentRiskLevel: nil,
+//            lastUpdated: nil,
+//            createdAt: nil,
+//            registeredBy: nil,
+//            startTime: nil,
+//            finishTime: nil
+//        )
+    )
 }
 
