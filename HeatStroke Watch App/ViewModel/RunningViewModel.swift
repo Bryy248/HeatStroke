@@ -183,6 +183,7 @@ final class RunningViewModel {
     
     func pauseTimer() {
         timerTask?.cancel()
+        isPaused = true
     }
     
     func resumeTimer() {
@@ -198,17 +199,20 @@ final class RunningViewModel {
                 elapsedSeconds = Int(Date().timeIntervalSince(currentStart))
             }
         }
+        isPaused = false
     }
     
-    func stopTimer(runner: Runner) {
+    func stopTimer() {
+        guard let runner = currentRunner else { return }
         timerTask?.cancel()
         let finishTime = Date()
-        
+        isFinished = true
+        stopMonitoring()
         Task {
             await saveFinishTime(runner: runner, finishTime: finishTime)
         }
     }
-    
+        
     //function untuk masukin data timer ke database
     @MainActor
     private func saveStartTime(runner: Runner, startTime: Date) async {
@@ -228,7 +232,7 @@ final class RunningViewModel {
         do {
             try await SupabaseManager.client
                 .from("runners")
-                .update(["finsih_time": ISO8601DateFormatter().string(from: finishTime)])
+                .update(["finish_time": ISO8601DateFormatter().string(from: finishTime)])
                 .eq("id", value: runner.id)
                 .execute()
         } catch {
@@ -306,17 +310,8 @@ final class RunningViewModel {
     @MainActor
     private func performRiskCalculation() async {
         guard let runner = currentRunner else { return }
-        
-        // Guard age
-        guard let age = runner.age else {
-            return
-        }
-        
-        // guard menghitung awal2
-        guard heartRateManager.value > 0 else {
-            return
-        }
-                
+        guard let age = runner.age else { return }
+        guard heartRateManager.value > 0 else { return }
         
         let avgHR = Double(heartRateManager.averageHeartRate ?? heartRateManager.value)
         
@@ -325,36 +320,32 @@ final class RunningViewModel {
             humidity: humidity
         )
         
-        //perhitungan untuk risk level
         let riskLevel = HeatStrokeRiskCalculator.overallRisk(
             heartRateBPM: avgHR,
             age: age,
-            coreTemperatureC: Double(bodyTemperature),
+            coreTemperatureC: bodyTemperature,
             heatIndexC: heatIndexValue
         )
         
-        // call function untuk perhitungan score
         let percentHRmax = HeatStrokeRiskCalculator.percentOfMaxHeartRate(bpm: avgHR, age: age)
-        let hrScore = Double(HeatStrokeRiskCalculator.heartRateScore(percentHRmax: percentHRmax))
-        let coreTempScore = Double(HeatStrokeRiskCalculator.coreTemperatureScore(celsius: Double(bodyTemperature)))
-        let heatIndexScoreValue = Double(HeatStrokeRiskCalculator.heatIndexScore(heatIndexValue))
-        let finalScore = hrScore + coreTempScore + heatIndexScoreValue
+        let hrScore = HeatStrokeRiskCalculator.heartRateScore(percentHRmax: percentHRmax)
+        let coreTempScore = HeatStrokeRiskCalculator.coreTemperatureScore(celsius: bodyTemperature)
+        let heatIndexScoreValue = HeatStrokeRiskCalculator.heatIndexScore(heatIndexValue)
+        let total = hrScore + coreTempScore + heatIndexScoreValue
         
-        // Update condition di UI
         self.condition = mapToRunningCondition(riskLevel)
-        print("Condition: \(condition)")
         
-        // masukin ke database
         let calculation = RiskCalculation(
             id: UUID(),
             runnerId: runner.id,
-            averageTemperature: ambientTemperature,
-            averageHumidity: humidity,
-            heatIndex: heatIndexValue,
-            heatIndexScore: heatIndexScoreValue,
+            sensorReadingId: nil,   // isi kalau kamu udah simpan sensor_readings & tau ID-nya, kalau belum biarin nil
+            heartRate: avgHR,
+            bodyTemperatureC: bodyTemperature,
+            heatIndexC: heatIndexValue,
             heartRateScore: hrScore,
-            bodyTemperature: Double(bodyTemperature),
-            finalRiskScore: finalScore,
+            bodyTemperatureScore: coreTempScore,
+            heatIndexScore: heatIndexScoreValue,
+            totalScore: total,
             riskLevel: riskLevel.label.lowercased(),
             calculatedAt: Date()
         )
@@ -369,11 +360,11 @@ final class RunningViewModel {
             print(error)
         }
     }
-
+    
     //retuen run condition
     private func mapToRunningCondition(_ level: RiskLevel) -> RunningCondition {
         switch level {
-        case .normal: return .safe
+        case .safe: return .safe
         case .moderate: return .moderate
         case .high: return .high
         case .veryHigh: return .emergency

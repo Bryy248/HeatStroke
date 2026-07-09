@@ -81,7 +81,7 @@ struct HeartRateView: View {
 
     private func riskColor(_ level: RiskLevel) -> Color {
         switch level {
-        case .normal: return .green
+        case .safe: return .green
         case .moderate: return .yellow
         case .high: return .orange
         case .veryHigh: return .red

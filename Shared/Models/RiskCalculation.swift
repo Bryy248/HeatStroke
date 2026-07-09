@@ -10,26 +10,28 @@ import SwiftUI
 struct RiskCalculation: Codable, Identifiable {
     let id: UUID
     let runnerId: UUID
-    let averageTemperature: Double
-    let averageHumidity: Double
-    let heatIndex: Double
-    let heatIndexScore: Double
-    let heartRateScore: Double
-    let bodyTemperature: Double
-    let finalRiskScore: Double // skor untuk mendeteksi risk level
-    let riskLevel: String // safe, moderate, caution, danger
+    let sensorReadingId: UUID?
+    let heartRate: Double
+    let bodyTemperatureC: Double
+    let heatIndexC: Double
+    let heartRateScore: Int
+    let bodyTemperatureScore: Int
+    let heatIndexScore: Int // dari suhu dan humidity
+    let totalScore: Int // jumlah skor2
+    let riskLevel: String
     let calculatedAt: Date?
     
     enum CodingKeys: String, CodingKey {
         case id
         case runnerId = "runner_id"
-        case averageTemperature = "average_temperature"
-        case averageHumidity = "average_humidity"
-        case heatIndex = "heat_index"
-        case heatIndexScore = "heat_index_score"
+        case sensorReadingId = "sensor_reading_id"
+        case heartRate = "heart_rate"
+        case bodyTemperatureC = "body_temperature_c"
+        case heatIndexC = "heat_index_c"
         case heartRateScore = "heart_rate_score"
-        case bodyTemperature = "body_temperature"
-        case finalRiskScore = "final_risk_score"
+        case bodyTemperatureScore = "body_temperature_score"
+        case heatIndexScore = "heat_index_score"
+        case totalScore = "total_score"
         case riskLevel = "risk_level"
         case calculatedAt = "calculated_at"
     }
