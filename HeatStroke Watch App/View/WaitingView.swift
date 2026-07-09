@@ -98,6 +98,7 @@ struct WaitingView: View {
             .onAppear {
                 vm.start()
 //                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { //UNTUK SEMENTARA WAIT 3S buat lanjut ke running view
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { //UNTUK SEMENTARA WAIT 3S buat lanjut ke running view
 ////                    navigateToReady = false
 //                    $vm.navigateToReady// awalnya "true", nanti buat func untuk return true false
 //                }
