@@ -84,7 +84,7 @@ struct HeartRateView: View {
         case .safe: return .green
         case .moderate: return .yellow
         case .high: return .orange
-        case .veryHigh: return .red
+        case .emergency: return .red
         }
     }
 

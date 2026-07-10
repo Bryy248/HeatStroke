@@ -11,7 +11,7 @@ enum RiskLevel: Int, Comparable {
     case safe = 0
     case moderate = 1
     case high = 2
-    case veryHigh = 3
+    case emergency = 3
 
     static func < (lhs: RiskLevel, rhs: RiskLevel) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -22,7 +22,7 @@ enum RiskLevel: Int, Comparable {
         case .safe: return "Safe"
         case .moderate: return "Moderate"
         case .high: return "High"
-        case .veryHigh: return "Very High"
+        case .emergency: return "Emergency"
         }
     }
 }
@@ -133,7 +133,7 @@ struct HeatStrokeRiskCalculator {
         case 0...4: return .safe
         case 5...14: return .moderate
         case 15...24: return .high
-        default: return .veryHigh   // 31-40
+        default: return .emergency   // 31-40
         }
     }
 }

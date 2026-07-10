@@ -21,7 +21,13 @@ struct RunningView: View {
         case .countdown:
             CountdownView
         case .running:
-            RunningView
+            ZStack {
+                RunningView
+                
+                if viewModel.showSlowDown {
+                    SlowDownView //overlay untuk slowdown
+                }
+            }
         case .emergency:
             EmergencyView(viewModel: viewModel)
         }
@@ -68,12 +74,50 @@ struct RunningView: View {
                 }
                 .frame(width: 131, height: 131)
                 // TODO: JANGAN LUPA DIGANTI
-//                .task {await viewModel.startCountdown(runner: runner)}
+                //                .task {await viewModel.startCountdown(runner: runner)}
                 .task {await viewModel.startCountdown(runner: Runner.dummy)}
             }
             Text("Start Monitoring")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white)
+        }
+    }
+    
+    private var SlowDownView: some View {
+        ZStack {
+            (isBlinkOn ? Color.red : Color.white)
+                       .ignoresSafeArea()
+            
+            VStack {
+                Text("Slow\nDown")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundColor(isBlinkOn ? .white : .red)   // ✅ ikut kontras background
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            viewModel.dismissSlowDown()
+        }
+        .onAppear {
+            startBlinking()
+        }
+        .onDisappear {
+            blinkTask?.cancel()
+        }
+    }
+    
+    @State private var isBlinkOn = true
+    @State private var blinkTask: Task<Void, Never>?
+
+    private func startBlinking() {
+        blinkTask?.cancel()
+        blinkTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(0.5))
+                isBlinkOn.toggle()
+            }
         }
     }
     
@@ -111,7 +155,7 @@ struct RunningView: View {
                             } else {
                                 viewModel.pauseTimer()
                             }
-
+                            
                         } label: {
                             Image(systemName: viewModel.isPaused ? "play.fill" : "pause.fill")
                                 .font(.system(size: 28, weight: .semibold))
@@ -131,7 +175,7 @@ struct RunningView: View {
                 // emergency call
                 VStack(spacing: 6) {
                     Button {
-                        viewModel.callEmergency() 
+                        viewModel.callEmergency()
                     } label: {
                         Image(systemName: "phone.fill")
                             .font(.system(size: 28, weight: .semibold))
@@ -171,13 +215,13 @@ struct RunningView: View {
                     }
                     
                     if viewModel.firstTimeDangereous && viewModel.condition == .emergency {
-                        Text("Slow down your pace & drink water now!")
+                        Text("Stop when not feeling well & keep hydrating")
                             .font(.system(size: 16, weight: .light))
                             .foregroundColor(viewModel.isPaused ? .gray :.white)
                             .multilineTextAlignment(.center)
                         
                         Button {
-                            // goes to emergency view
+                            viewModel.callEmergency()
                         } label: {
                             Text("I'm not okay")
                                 .font(.system(size: 14, weight: .semibold))
@@ -190,9 +234,9 @@ struct RunningView: View {
                         
                         Button {
                             viewModel.firstTimeDangereous.toggle()
-                            // stay in here
+                            viewModel.cancelIdleReminder()
                         } label: {
-                            Text("I'm fine")
+                            Text("I'm okay")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(.white)
                         }
@@ -216,7 +260,7 @@ struct RunningView: View {
                         Text("\(viewModel.heartRate)")
                             .font(.system(size: 24))
                             .foregroundColor(viewModel.condition.fontcolor)
-
+                        
                         HStack(spacing: 2) {
                             Image(systemName: "heart.fill")
                                 .foregroundColor(.red)
@@ -231,7 +275,7 @@ struct RunningView: View {
                         Text(String(format: "%.1f°", viewModel.bodyTemperature))
                             .font(.system(size: 24))
                             .foregroundColor(viewModel.condition.fontcolor)
-
+                        
                         HStack(spacing: 2) {
                             Image(systemName: "thermometer.variable.and.figure")
                                 .foregroundColor(.suhuBgcolor)
@@ -284,8 +328,8 @@ struct RunningView: View {
             .tag(2)
         }
         .tabViewStyle(.page)
-        }
     }
+}
 
 // TODO: JANGAN LUPA DIHAPUS
 //DUMMY UNTUK RUN (NABIEL) - JANGAN LUPA DIHAPUS

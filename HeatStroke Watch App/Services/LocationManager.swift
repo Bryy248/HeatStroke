@@ -48,7 +48,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     /// Dipanggil dari ViewModel tiap kali riskLevel berubah.
     func updateSamplingInterval(for riskLevel: RiskLevel) {
-        let newInterval: TimeInterval = (riskLevel == .veryHigh) ? 0 : 60
+        let newInterval: TimeInterval = (riskLevel == .emergency) ? 0 : 60
         guard newInterval != samplingInterval else { return }
         samplingInterval = newInterval
         print("📍 Sampling GPS diubah: \(newInterval == 0 ? "near real-time" : "\(Int(newInterval))s sekali")")
