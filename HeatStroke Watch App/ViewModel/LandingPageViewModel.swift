@@ -23,12 +23,23 @@ final class LandingPageViewModel {
     
     private func startDate(of event: Event) -> Date? {
         guard let startTime = event.startTime else { return nil }
-        return Self.isoFormatter.date(from: startTime)
+        return Self.parseISO(startTime)
     }
-    
-    private static let isoFormatter: ISO8601DateFormatter = {
+
+    // Coba parse dengan fractional seconds dulu, lalu fallback tanpa fractional.
+    private static func parseISO(_ string: String) -> Date? {
+        isoWithFraction.date(from: string) ?? isoPlain.date(from: string)
+    }
+
+    private static let isoWithFraction: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    private static let isoPlain: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
         return f
     }()
     
@@ -55,10 +66,20 @@ final class LandingPageViewModel {
         isLoading = true
         defer { isLoading = false }
         
-        guard let uid = SupabaseManager.client.auth.currentUser?.id else {
-            events = []; runners = []
-            return
+        if SupabaseManager.client.auth.currentUser == nil {
+            do {
+                try await SupabaseManager.client.auth.signInAnonymously()
+            } catch {
+                print("anon sign-in failed: \(error)")
+                events = []; runners = []
+                return
+            }
         }
+        
+        guard let uid = SupabaseManager.client.auth.currentUser?.id else {
+                events = []; runners = []
+                return
+            }
         
         do {
             // hanya runner yang sudah di-claim user ini

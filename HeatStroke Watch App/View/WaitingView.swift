@@ -38,7 +38,7 @@ struct WaitingView: View {
 //    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        NavigationStack {
+//        NavigationStack {
             VStack(spacing: 16){
                 VStack(spacing: 0){
                     Text("You Are Connected")
@@ -120,7 +120,7 @@ struct WaitingView: View {
             .sheet(isPresented: $showInfo) {
                 ShowInfoView()
             }
-        }
+//        }
     }
     
     //ini buat countdown juga (functionnya maybe bisa dipindahin nanti)

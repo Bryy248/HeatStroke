@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import WatchKit
+import Supabase
 
 @main
 struct HeatStroke_Watch_AppApp: App {
@@ -17,8 +19,16 @@ struct HeatStroke_Watch_AppApp: App {
 //            LandingPageView()
             RunningView()
                 .task {
+                    do {
+                        if SupabaseManager.client.auth.currentUser == nil {
+                            try await SupabaseManager.client.auth.signInAnonymously()
+                        }
+                    } catch { print("anon sign-in failed: \(error)")}
                     await DummyDataService().seedDummyData()
                 }
+            
         }
+        WKNotificationScene(controller: NotificationController.self, category: "HIGH_ALERT")
+        WKNotificationScene(controller: NotificationController.self, category: "DANGER_ALERT")
     }
 }

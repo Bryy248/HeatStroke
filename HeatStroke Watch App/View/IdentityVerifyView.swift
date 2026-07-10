@@ -10,7 +10,8 @@ import SwiftUI
 struct IdentityVerifyView: View {
     @State private var viewModel: IdentityVerifyViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var goToWaitingView = false
+//    @State private var goToWaitingView = false
+    @State private var goToConfirmationView = false
 
     init(event: Event, bib: String, birthDate: Date) {
         _viewModel = State(initialValue: IdentityVerifyViewModel(
@@ -32,8 +33,11 @@ struct IdentityVerifyView: View {
         .task {
             await viewModel.verify()
         }
-        .navigationDestination(isPresented: $goToWaitingView) {
-            WaitingView()
+//        .navigationDestination(isPresented: $goToWaitingView) {
+//            WaitingView()
+//        }
+        .navigationDestination(isPresented: $goToConfirmationView) {
+            ConfirmationView()
         }
     }
 
@@ -79,7 +83,7 @@ struct IdentityVerifyView: View {
                     Button("Yes") {
                         Task {
                             await viewModel.claim(runner)   // ← tandai milik user
-                            goToWaitingView = true
+                            goToConfirmationView = true
                         }
                     }
                     .buttonStyle(.borderedProminent)

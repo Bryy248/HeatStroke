@@ -91,6 +91,15 @@ final class RunningViewModel {
                 return .xmarkBgcolor
             }
         }
+        
+        var severity: Int {
+            switch self {
+            case .safe:      return 0
+            case .moderate:  return 1
+            case .high:      return 2
+            case .emergency: return 3
+            }
+        }
     }
     
     //state for enum -> placeholder
@@ -354,6 +363,8 @@ final class RunningViewModel {
             
             previousCondition = newCondition
             self.condition = newCondition
+        notifyIfNeeded(from: self.condition, to: newCondition)
+        self.condition = newCondition
         
         let calculation = RiskCalculation(
             id: UUID(),
@@ -388,6 +399,27 @@ final class RunningViewModel {
         case .moderate: return .moderate
         case .high: return .high
         case .emergency: return .emergency
+        }
+    }
+    
+    private func notifyIfNeeded(from old: RunningCondition, to new: RunningCondition) {
+        guard new.severity > old.severity else { return }
+        
+        switch new {
+        case .high:
+            NotificationManager.shared.send(
+                category: .high,
+                title: "Heat risk rising",
+                body: "Slow down and hydrate now."
+            )
+        case .emergency:
+            NotificationManager.shared.send(
+                category: .danger,
+                title: "Dangerous heat level",
+                body: "Stop and cool down immediately."
+            )
+        default:
+            break
         }
     }
     

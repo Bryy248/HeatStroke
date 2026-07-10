@@ -43,10 +43,15 @@ struct LandingPageView: View {
             .navigationDestination(isPresented: $showAddEvent) {
                 MarathonCodeView()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .goHome)) { _ in
+                showAddEvent = false
+                Task {
+                    await viewModel.fetchEvents()
+                }
+            }
         }
         .task {
             guard shouldFetch else { return } // untuk preview
-            NotificationManager.shared.sendTestNotification()
             await viewModel.fetchEvents()
         }
     }
@@ -86,10 +91,15 @@ struct LandingPageView: View {
         Section {
             ForEach(events) { event in
                 if let runner = viewModel.runner(for: event) {
-                    EventRowView(
-                        event: event,
-                        runner: runner
-                    )
+                    NavigationLink {
+                        WaitingView()
+                    } label: {
+                        EventRowView(
+                            event: event,
+                            runner: runner
+                            
+                        )
+                    }
                     .swipeActions {
                         Button(role: .destructive) {
                             Task {
