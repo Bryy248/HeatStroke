@@ -19,27 +19,30 @@ class NotificationManager {
             }
     }
     
-    func sendHeatAlert() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            guard settings.authorizationStatus == .authorized else { return }
-            self.fireNotification()
-        }
-    }
-    
-    private func fireNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Heat risk rising"
-        content.body  = "Slow down and hydrate now."
-        content.sound = .default
+    func send(category: NotifCategory,
+                  title: String,
+                  body: String,
+                  after seconds: TimeInterval = 1) {
 
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(
-            identifier: UUID().uuidString,
-            content: content,
-            trigger: trigger
-        )
-        UNUserNotificationCenter.current().add(request)
-    }
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                guard settings.authorizationStatus == .authorized else {
+                    print("Notif belum diizinkan!")
+                    return
+                }
+
+                let content = UNMutableNotificationContent()
+                content.title = title
+                content.body  = body
+                content.sound = .default
+                content.categoryIdentifier = category.rawValue
+
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
+                let request = UNNotificationRequest(identifier: UUID().uuidString,
+                                                    content: content,
+                                                    trigger: trigger)
+                UNUserNotificationCenter.current().add(request)
+            }
+        }
     
     // test
     func sendTestNotification() {
@@ -48,15 +51,15 @@ class NotificationManager {
                 print("Notif belum diizinkan!")
                 return
             }
-
+            
             let content = UNMutableNotificationContent()
             content.title = "Test notif"
             content.body  = "Kalau kamu lihat ini, notif jalan!"
             content.sound = .default
-
+            
             // 5 detik cukup buat kamu keburu keluar ke background
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 30, repeats: false)
-
+            
             let request = UNNotificationRequest(
                 identifier: UUID().uuidString,
                 content: content,
