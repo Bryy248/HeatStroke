@@ -16,7 +16,7 @@ struct IdentityView: View {
         }
     
     var body: some View {
-        NavigationStack {
+//        NavigationStack {
             List {
                 Text(viewModel.eventName)
                     .font(.system(size: 16, weight: .medium))
@@ -89,7 +89,7 @@ struct IdentityView: View {
                     birthDate: viewModel.birthDate
                 )
             }
-        }
+//        }
     }
     
     
