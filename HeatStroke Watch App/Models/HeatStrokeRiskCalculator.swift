@@ -8,7 +8,7 @@
 import Foundation
 
 enum RiskLevel: Int, Comparable {
-    case normal = 0
+    case safe = 0
     case moderate = 1
     case high = 2
     case veryHigh = 3
@@ -19,7 +19,7 @@ enum RiskLevel: Int, Comparable {
 
     var label: String {
         switch self {
-        case .normal: return "Normal"
+        case .safe: return "Safe"
         case .moderate: return "Moderate"
         case .high: return "High"
         case .veryHigh: return "Very High"
@@ -130,7 +130,7 @@ struct HeatStrokeRiskCalculator {
             + heatIndexScore(heatIndexC)
 
         switch total {
-        case 0...4: return .normal
+        case 0...4: return .safe
         case 5...14: return .moderate
         case 15...24: return .high
         default: return .veryHigh   // 31-40

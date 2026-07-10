@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Observation
+import Supabase
+import Combine
 
 @Observable
 final class RunningViewModel {
@@ -92,9 +94,9 @@ final class RunningViewModel {
     }
     
     //state for enum -> placeholder
-    var state: RunningState = .running
-    var condition: RunningCondition = .high
-
+    var state: RunningState = .ready
+    var condition: RunningCondition = .safe
+    
     //condition when state is Running
     var isPaused = false
     var isFinished = false
@@ -109,43 +111,285 @@ final class RunningViewModel {
     var selectedTab = 1
     
     //placeholder angka -> ubah biar bisa connect
-    var heartRate = 138
-    var bodyTemperature = 37
-    var ambientTemperature = 31
-    var humidity = 78
-    var timer = "00:10,24"
+    var heartRate = 0
+    var bodyTemperature = 34.8
+    var ambientTemperature = 31.0
+    var humidity = 78.0
     
-//function for ready animation
+    //heart rate integration
+    private let heartRateManager = HeartRateManager()
+    private var cancellables = Set<AnyCancellable>()
+    private var avgHRSendTimer: Task<Void, Never>?
+    
+    // wrist/core temperature
+    private let wristTemperatureManager = WristTemperatureManager()
+    private var coreTempSendTimer: Task<Void, Never>?
+    private var latestAmbientTemperature: Double = 31.0 //fallback untuk ambient temperature
+    
+    // evironment data
+    private let environmentDataManager = EnvironmentDataManager()
+    
+    //runner
+    private var currentRunner: Runner?
+    
+    private var riskCalculationTimer: Task<Void, Never>?
+    
+    //function for ready animation
     func startReady() {
-
+        
         progressReady = 0
-
+        
         withAnimation(.linear(duration: 2)) {
             progressReady = 1
         }
-
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             self.progressReady = 0
             self.state = .countdown
         }
     }
     
-    //function for countdown animation
-    func startCountdown() async { //async -> timer tanpa freeze
-
-                for number in stride(from: 3, through: 1, by: -1) { //loop dari 3 hingga 1
-                    countdown = number
-                    
-                    try? await Task.sleep(for: .milliseconds(50))
-                    
-                    withAnimation(.linear(duration: 1)) {
-                        progressCountdown = CGFloat(number - 1) / 3
-                    }
-                    
-                    
-                    try? await Task.sleep(for: .seconds(1))
-                    //await -> tunggu operasi selesai, task sleep -> program menunggu 1s
-                }
-        self.state = .running
+    
+    // MARK: timer section
+    var elapsedSeconds: Int = 0
+    private var timerTask: Task<Void, Never>?
+    private var startDate: Date?
+    
+    var formattedTimer: String {
+        let hours = elapsedSeconds / 3600
+        let minutes = (elapsedSeconds % 3600) / 60
+        let seconds = elapsedSeconds % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+    
+    func startTimer(runner: Runner) {
+        let now = Date()
+        startDate = now
+        elapsedSeconds = 0
+        
+        timerTask?.cancel() //cancel timer yang mungkin masih jalan
+        timerTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let startDate else { return }
+                elapsedSeconds = Int(Date().timeIntervalSince(startDate))
             }
+        }
+        
+        Task {
+            await saveStartTime(runner: runner, startTime: now)
+        }
+    }
+    
+    func pauseTimer() {
+        timerTask?.cancel()
+        isPaused = true
+    }
+    
+    func resumeTimer() {
+        guard let pausedElapsed = elapsedSeconds as Int?, let startDate else { return }
+        // geser startDate mundur sesuai elapsed yang udah kepakai, biar lanjut bukan reset
+        self.startDate = Date().addingTimeInterval(-Double(pausedElapsed))
+        
+        timerTask?.cancel()
+        timerTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let currentStart = self.startDate else { return }
+                elapsedSeconds = Int(Date().timeIntervalSince(currentStart))
+            }
+        }
+        isPaused = false
+    }
+    
+    func stopTimer() {
+        guard let runner = currentRunner else { return }
+        timerTask?.cancel()
+        let finishTime = Date()
+        isFinished = true
+        stopMonitoring()
+        Task {
+            await saveFinishTime(runner: runner, finishTime: finishTime)
+        }
+    }
+        
+    //function untuk masukin data timer ke database
+    @MainActor
+    private func saveStartTime(runner: Runner, startTime: Date) async {
+        do {
+            try await SupabaseManager.client
+                .from("runners")
+                .update(["start_time": ISO8601DateFormatter().string(from: startTime)])
+                .eq("id", value: runner.id)
+                .execute()
+        } catch {
+            print(error)
+        }
+    }
+    
+    @MainActor
+    private func saveFinishTime(runner: Runner, finishTime: Date) async {
+        do {
+            try await SupabaseManager.client
+                .from("runners")
+                .update(["finish_time": ISO8601DateFormatter().string(from: finishTime)])
+                .eq("id", value: runner.id)
+                .execute()
+        } catch {
+            print(error)
+        }
+    }
+    
+    func startMonitoring(runner: Runner) {
+        currentRunner = runner
+        
+        // Mulai semua manager
+        heartRateManager.start()
+        environmentDataManager.start()
+        wristTemperatureManager.authorize { [weak self] success in
+            if success { self?.wristTemperatureManager.fetchLatest() }
+        }
+        
+        // Observasi tiap manager, cuma buat update UI real-time (BUKAN buat insert database)
+        heartRateManager.$value
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.heartRate = $0 }
+            .store(in: &cancellables)
+        
+        wristTemperatureManager.$temperature
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink { [weak self] skinTemp in
+                guard let self else { return }
+                self.bodyTemperature = HeatStrokeRiskCalculator.estimatedCoreTemperature(
+                    skinTemperature: skinTemp,
+                    ambientTemperature: self.ambientTemperature
+                )
+            }
+            .store(in: &cancellables)
+        
+        environmentDataManager.$averageTemperature
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink { [weak self] in self?.ambientTemperature = $0 }
+            .store(in: &cancellables)
+        
+        environmentDataManager.$averageHumidity
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink { [weak self] in self?.humidity = $0 }
+            .store(in: &cancellables)
+        
+        // Refresh wrist temp berkala (one-shot query, bukan live stream)
+        Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(30))
+                wristTemperatureManager.fetchLatest()
+            }
+        }
+        
+        // Timer TERPUSAT buat hitung & insert SATU row ke risk_calculations
+        riskCalculationTimer?.cancel()
+        riskCalculationTimer = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(30))
+                await performRiskCalculation()
+            }
+        }
+    }
+    
+    func stopMonitoring() {
+        heartRateManager.stop()
+        environmentDataManager.stop()
+        riskCalculationTimer?.cancel()
+        cancellables.removeAll()
+    }
+    
+    // MARK: risk calculation dari suhu, hum, heart rate, dan wrist temp
+    
+    @MainActor
+    private func performRiskCalculation() async {
+        guard let runner = currentRunner else { return }
+        guard let age = runner.age else { return }
+        guard heartRateManager.value > 0 else { return }
+        
+        let avgHR = Double(heartRateManager.averageHeartRate ?? heartRateManager.value)
+        
+        let heatIndexValue = HeatStrokeRiskCalculator.heatIndex(
+            temperature: ambientTemperature,
+            humidity: humidity
+        )
+        
+        let riskLevel = HeatStrokeRiskCalculator.overallRisk(
+            heartRateBPM: avgHR,
+            age: age,
+            coreTemperatureC: bodyTemperature,
+            heatIndexC: heatIndexValue
+        )
+        
+        let percentHRmax = HeatStrokeRiskCalculator.percentOfMaxHeartRate(bpm: avgHR, age: age)
+        let hrScore = HeatStrokeRiskCalculator.heartRateScore(percentHRmax: percentHRmax)
+        let coreTempScore = HeatStrokeRiskCalculator.coreTemperatureScore(celsius: bodyTemperature)
+        let heatIndexScoreValue = HeatStrokeRiskCalculator.heatIndexScore(heatIndexValue)
+        let total = hrScore + coreTempScore + heatIndexScoreValue
+        
+        self.condition = mapToRunningCondition(riskLevel)
+        
+        let calculation = RiskCalculation(
+            id: UUID(),
+            runnerId: runner.id,
+            sensorReadingId: nil,   // isi kalau kamu udah simpan sensor_readings & tau ID-nya, kalau belum biarin nil
+            heartRate: avgHR,
+            bodyTemperatureC: bodyTemperature,
+            heatIndexC: heatIndexValue,
+            heartRateScore: hrScore,
+            bodyTemperatureScore: coreTempScore,
+            heatIndexScore: heatIndexScoreValue,
+            totalScore: total,
+            riskLevel: riskLevel.label.lowercased(),
+            calculatedAt: Date()
+        )
+        
+        do {
+            try await SupabaseManager.client
+                .from("risk_calculations")
+                .insert(calculation)
+                .execute()
+            print("Risk calculation tersimpan: \(riskLevel.label)")
+        } catch {
+            print(error)
+        }
+    }
+    
+    //retuen run condition
+    private func mapToRunningCondition(_ level: RiskLevel) -> RunningCondition {
+        switch level {
+        case .safe: return .safe
+        case .moderate: return .moderate
+        case .high: return .high
+        case .veryHigh: return .emergency
+        }
+    }
+    
+    
+    // MARK: function for countdown start running
+    func startCountdown(runner: Runner) async { //async -> timer tanpa freeze
+        
+        for number in stride(from: 3, through: 1, by: -1) { //loop dari 3 hingga 1
+            countdown = number
+            
+            try? await Task.sleep(for: .milliseconds(50))
+            
+            withAnimation(.linear(duration: 1)) {
+                progressCountdown = CGFloat(number - 1) / 3
+            }
+            
+            try? await Task.sleep(for: .seconds(1))
+            //await -> tunggu operasi selesai, task sleep -> program menunggu 1s
+        }
+        self.state = .running
+        startTimer(runner: runner)
+        startMonitoring(runner: runner)
+    }
+    
 }
