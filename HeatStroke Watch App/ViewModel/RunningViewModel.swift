@@ -18,7 +18,7 @@ final class RunningViewModel {
         case ready
         case countdown
         case running
-        //
+        case emergency
     }
     
     // Running Condition
@@ -95,7 +95,7 @@ final class RunningViewModel {
     
     //state for enum -> placeholder
     var state: RunningState = .ready
-    var condition: RunningCondition = .safe
+    var condition: RunningCondition = .emergency
     
     //condition when state is Running
     var isPaused = false
@@ -128,6 +128,9 @@ final class RunningViewModel {
     
     // evironment data
     private let environmentDataManager = EnvironmentDataManager()
+    
+    //location user
+    private let locationManager = LocationManager()
     
     //runner
     private var currentRunner: Runner?
@@ -390,6 +393,79 @@ final class RunningViewModel {
         self.state = .running
         startTimer(runner: runner)
         startMonitoring(runner: runner)
+    }
+    
+    // MARK: function for emergency
+    private var activeHelpRequestId: UUID?
+    
+    //status pending (call emergency)
+    func callEmergency() {
+        guard let runner = currentRunner else { return }
+        
+        locationManager.start()
+        state = .emergency
+        
+        Task {
+            await createHelpRequest(runner: runner)
+        }
+    }
+    
+    @MainActor
+    private func createHelpRequest(runner: Runner) async {
+        let newId = UUID()
+        activeHelpRequestId = newId
+        
+        let coordinate = locationManager.currentCoordinate
+        
+        let request = HelpRequest(
+            id: newId,
+            runnerId: runner.id,
+            eventId: runner.eventId,
+            requestedAt: Date(),
+            latitude: coordinate?.latitude,
+            longitude: coordinate?.longitude,
+            status: "pending",
+            riskLevelAtRequest: condition.title.lowercased(),
+            marshalId: nil,
+            respondedAt: nil
+        )
+        
+        do {
+            try await SupabaseManager.client
+                .from("help_requests")
+                .insert(request)
+                .execute()
+        } catch {
+            print(error)
+        }
+    }
+    
+    //status resolved for emergency
+    func resolveEmergency() {
+        state = .running
+        
+        Task {
+            await resolveHelpRequest()
+        }
+    }
+
+    @MainActor
+    private func resolveHelpRequest() async {
+        guard let requestId = activeHelpRequestId else { return }
+        
+        do {
+            try await SupabaseManager.client
+                .from("help_requests")
+                .update([
+                    "status": "resolved",
+                    "responded_at": ISO8601DateFormatter().string(from: Date())
+                ])
+                .eq("id", value: requestId)
+                .execute()
+            activeHelpRequestId = nil
+        } catch {
+            print(error)
+        }
     }
     
 }

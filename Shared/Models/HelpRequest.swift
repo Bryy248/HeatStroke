@@ -28,7 +28,7 @@ struct HelpRequest: Codable, Identifiable {
         case longitude
         case status
         case riskLevelAtRequest = "risk_level_at_request"
-        case marshalId = "marshalId"
+        case marshalId = "marshal_id"
         case respondedAt = "responded_at"
     }
 }

@@ -22,6 +22,8 @@ struct RunningView: View {
             CountdownView
         case .running:
             RunningView
+        case .emergency:
+            EmergencyView(viewModel: viewModel)
         }
     }
     
@@ -129,8 +131,7 @@ struct RunningView: View {
                 // emergency call
                 VStack(spacing: 6) {
                     Button {
-                        // They will call emergency
-                        // goes to Emergency view
+                        viewModel.callEmergency() 
                     } label: {
                         Image(systemName: "phone.fill")
                             .font(.system(size: 28, weight: .semibold))
@@ -311,21 +312,6 @@ extension Runner {
 
 #Preview {
     RunningView(
-//        runner: Runner(
-//            id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
-//            eventId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
-//            name: "Bryan Chang",
-//            bibNumber: "M1234",
-//            age: 21,
-//            birthDate: nil,
-//            gender: "male",
-//            currentRiskLevel: nil,
-//            lastUpdated: nil,
-//            createdAt: nil,
-//            registeredBy: nil,
-//            startTime: nil,
-//            finishTime: nil
-//        )
     )
 }
 

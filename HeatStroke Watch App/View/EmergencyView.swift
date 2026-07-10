@@ -9,6 +9,8 @@ import SwiftUI
 
 struct EmergencyView: View {
     
+    var viewModel: RunningViewModel
+    
     var body: some View {
         VStack(spacing: 18) {
             VStack{
@@ -27,7 +29,7 @@ struct EmergencyView: View {
             }
             
             Button {
-                // Aksi Button ?? masih kurtaw
+                viewModel.resolveEmergency()
             } label: {
                 Text("I'm okay now")
                     .font(.system(size: 14, weight: .semibold))
@@ -35,11 +37,10 @@ struct EmergencyView: View {
             .frame(width: 168, height: 52)
             .buttonStyle(.borderedProminent)
             .tint(.color1)
-            .disabled(true)
         }
     }
 }
 
 #Preview {
-    EmergencyView()
+    EmergencyView(viewModel: RunningViewModel())
 }
