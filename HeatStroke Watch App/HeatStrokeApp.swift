@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Supabase
 
 @main
 struct HeatStroke_Watch_AppApp: App {
@@ -13,8 +14,14 @@ struct HeatStroke_Watch_AppApp: App {
         WindowGroup {
             LandingPageView()
                 .task {
+                    do {
+                        if SupabaseManager.client.auth.currentUser == nil {
+                            try await SupabaseManager.client.auth.signInAnonymously()
+                        }
+                    } catch { print("anon sign-in failed: \(error)")}
                     await DummyDataService().seedDummyData()
                 }
+            
         }
     }
 }
