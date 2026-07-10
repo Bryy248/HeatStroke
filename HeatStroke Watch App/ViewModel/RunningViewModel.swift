@@ -324,9 +324,7 @@ final class RunningViewModel {
     }
     
     // MARK: risk calculation dari suhu, hum, heart rate, dan wrist temp
-    
-    private var previousCondition: RunningCondition = .safe
-    
+        
     @MainActor
     private func performRiskCalculation() async {
         guard let runner = currentRunner else { return }
@@ -355,16 +353,17 @@ final class RunningViewModel {
         let total = hrScore + coreTempScore + heatIndexScoreValue
         
         let newCondition = mapToRunningCondition(riskLevel)
+        let oldCondition = self.condition
+        
+        self.condition = newCondition
             
             // Cuma trigger slow down kalau baru PERTAMA KALI masuk emergency dari kondisi lain
-            if newCondition == .emergency && previousCondition != .emergency {
+            if newCondition == .emergency && oldCondition != .emergency {
                 triggerSlowDownIfNeeded()
             }
             
-            previousCondition = newCondition
-            self.condition = newCondition
-        notifyIfNeeded(from: self.condition, to: newCondition)
-        self.condition = newCondition
+        
+        notifyIfNeeded(from: oldCondition, to: newCondition)
         
         let calculation = RiskCalculation(
             id: UUID(),
