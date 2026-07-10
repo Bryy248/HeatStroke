@@ -52,22 +52,26 @@ final class IdentityVerifyViewModel {
         }
     }
     
-    enum DeviceIdentity {
-        static var currentDeviceId: UUID {
-            if let saved = UserDefaults.standard.string(forKey: "device_id"),
-               let uuid = UUID(uuidString: saved) {
-                return uuid
-            }
-            let newId = UUID()
-            UserDefaults.standard.set(newId.uuidString, forKey: "device_id")
-            return newId
-        }
-    }
+//    enum DeviceIdentity {
+//        static var currentDeviceId: UUID {
+//            if let saved = UserDefaults.standard.string(forKey: "device_id"),
+//               let uuid = UUID(uuidString: saved) {
+//                return uuid
+//            }
+//            let newId = UUID()
+//            UserDefaults.standard.set(newId.uuidString, forKey: "device_id")
+//            return newId
+//        }
+//    }
 
     // set registered_by = user ini, biar muncul di landing page
     @MainActor
     func claim(_ runner: Runner) async {
-        let deviceId = DeviceIdentity.currentDeviceId
+//        let deviceId = DeviceIdentity.currentDeviceId
+        guard let deviceId = SupabaseManager.client.auth.currentUser?.id else  {
+            print("❌ no signed-in user to claim with")
+                    return
+        }
         do {
             try await SupabaseManager.client
                 .from("runners")
