@@ -16,8 +16,7 @@ struct HeatStroke_Watch_AppApp: App {
         }
     var body: some Scene {
         WindowGroup {
-//            LandingPageView()
-            RunningView()
+            LandingPageView()
                 .task {
                     do {
                         if SupabaseManager.client.auth.currentUser == nil {

@@ -92,7 +92,9 @@ struct LandingPageView: View {
             ForEach(events) { event in
                 if let runner = viewModel.runner(for: event) {
                     NavigationLink {
-                        WaitingView()
+                        WaitingView(
+                            runner: runner,
+                            event: event)
                     } label: {
                         EventRowView(
                             event: event,

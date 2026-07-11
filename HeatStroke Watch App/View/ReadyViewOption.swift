@@ -135,7 +135,7 @@ struct ReadyViewOption: View {
         .onAppear { vm.start() }
         .onDisappear { vm.stop() }
         .fullScreenCover(isPresented: $vm.goToRunning) {
-                RunningView()
+            RunningView(runner: vm.runner)
                 .toolbar(.hidden)
             }
     }
@@ -169,5 +169,5 @@ struct ReadyViewOption: View {
 }
 
 #Preview {
-    ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
+//    ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
 }

@@ -89,7 +89,6 @@ class WaitingViewModel {
         }
         
         
-        
         guard now < targetDate else {
             timeRemainingString = "Event Started!"
             navigateToReady = true

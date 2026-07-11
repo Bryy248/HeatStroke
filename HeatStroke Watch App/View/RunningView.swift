@@ -9,8 +9,7 @@ import SwiftUI
 
 struct RunningView: View {
     
-    // TODO: JANGAN LUPA DIGANTI (untuk ngambil dr readyview)
-    //    let runner: Runner
+    let runner: Runner
     
     @State private var viewModel = RunningViewModel()
     
@@ -73,9 +72,7 @@ struct RunningView: View {
                         .rotationEffect(.degrees(-90))
                 }
                 .frame(width: 131, height: 131)
-                // TODO: JANGAN LUPA DIGANTI
-                //                .task {await viewModel.startCountdown(runner: runner)}
-                .task {await viewModel.startCountdown(runner: Runner.dummy)}
+                .task {await viewModel.startCountdown(runner: runner)}
             }
             Text("Start Monitoring")
                 .font(.system(size: 14, weight: .medium))
@@ -331,31 +328,9 @@ struct RunningView: View {
     }
 }
 
-// TODO: JANGAN LUPA DIHAPUS
-//DUMMY UNTUK RUN (NABIEL) - JANGAN LUPA DIHAPUS
-extension Runner {
-    static var dummy: Runner {
-        Runner(
-            id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
-            eventId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
-            name: "Bryan Chang",
-            bibNumber: "M1234",
-            age: 21,
-            birthDate: nil,
-            gender: "male",
-            currentRiskLevel: nil,
-            lastUpdated: nil,
-            createdAt: nil,
-            registeredBy: nil,
-            startTime: nil,
-            finishTime: nil
-        )
-    }
-}
-
 
 #Preview {
-    RunningView(
-    )
+//    RunningView(
+//    )
 }
 
