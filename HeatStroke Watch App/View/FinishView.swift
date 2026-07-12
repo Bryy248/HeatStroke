@@ -71,6 +71,7 @@ struct FinishView: View {
                         .padding(.bottom, 4)
                     
                     Button {
+                        NotificationCenter.default.post(name: .goHome, object: nil)
                     } label: {
                         Text("Confirm")
                             .font(.system(size: 14, weight: .semibold))
