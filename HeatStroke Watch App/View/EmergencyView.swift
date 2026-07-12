@@ -38,6 +38,8 @@ struct EmergencyView: View {
             .buttonStyle(.borderedProminent)
             .tint(.color1)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.ignoresSafeArea())
     }
 }
 

@@ -195,9 +195,10 @@ struct RunningView: View {
                     ZStack {
                         Circle()
                             .foregroundStyle(viewModel.condition.color)
+                            .frame(width: 65, height: 65)
                             .blur(radius: 42)
                             .shadow(color: .color1, radius: 42)
-                            .frame(width: 65, height: 65)
+//                            .frame(width: 65, height: 65)
                         
                         VStack {
                             Image(systemName: viewModel.condition.icon)
@@ -210,6 +211,7 @@ struct RunningView: View {
                         }
                         .frame(width: 141, height: 110)
                     }
+                    .frame(width: 200, height: 150)
                     
                     if viewModel.firstTimeDangereous && viewModel.condition == .emergency {
                         Text("Stop when not feeling well & keep hydrating")
@@ -325,6 +327,7 @@ struct RunningView: View {
             .tag(2)
         }
         .tabViewStyle(.page)
+        .background(Color.black)
     }
 }
 
