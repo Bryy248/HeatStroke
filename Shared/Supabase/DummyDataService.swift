@@ -29,7 +29,7 @@ final class DummyDataService {
                 id: eventId,
                 name: "Jakarta International Marathon",
                 location: "Jakarta",
-                startTime: "2026-07-20T06:00:00+07:00",
+                startTime: "2026-07-11T22:26:00+07:00",
                 endTime: "2026-07-20T10:00:00+07:00",
                 createdAt: nil,
                 code: "BTN123"

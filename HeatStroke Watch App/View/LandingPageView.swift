@@ -10,6 +10,8 @@ import SwiftUI
 struct LandingPageView: View {
     
     @State private var viewModel: LandingPageViewModel
+    @State private var path = NavigationPath()
+    @State private var stackId = UUID()
     
     // agar bisa preview
     private let shouldFetch: Bool
@@ -25,7 +27,7 @@ struct LandingPageView: View {
     @State private var showAddEvent = false
     
     var body: some View {
-        NavigationStack {
+        NavigationStack (path: $path) {
             Group {
                 if viewModel.isLoading {
                     ProgressView()
@@ -45,11 +47,14 @@ struct LandingPageView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .goHome)) { _ in
                 showAddEvent = false
+                path = NavigationPath()
+                stackId = UUID()
                 Task {
                     await viewModel.fetchEvents()
                 }
             }
         }
+        .id(stackId)
         .task {
             guard shouldFetch else { return } // untuk preview
             await viewModel.fetchEvents()
@@ -92,7 +97,9 @@ struct LandingPageView: View {
             ForEach(events) { event in
                 if let runner = viewModel.runner(for: event) {
                     NavigationLink {
-                        WaitingView()
+                        WaitingView(
+                            runner: runner,
+                            event: event)
                     } label: {
                         EventRowView(
                             event: event,

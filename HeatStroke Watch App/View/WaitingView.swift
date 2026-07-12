@@ -10,6 +10,9 @@ import SwiftUI
 
 struct WaitingView: View {
     
+    let runner: Runner
+    let event: Event
+    
     @State private var offset: CGFloat = 200
 //    @State private var navigateToReady = false
     @State private var showInfo = false
@@ -27,10 +30,6 @@ struct WaitingView: View {
 //        components.minute = 00
 //        return calendar.date(from: components)!
 //    }()
-    
-    
-    
-    
     
     
     
@@ -105,7 +104,7 @@ struct WaitingView: View {
             }
             .onDisappear {vm.stop()}
             .navigationDestination(isPresented: $vm.navigateToReady) {
-                ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
+                ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager(), runner: runner))
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -183,5 +182,5 @@ struct WaitingView: View {
 }
 
 #Preview {
-    WaitingView()
+//    WaitingView()
 }

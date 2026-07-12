@@ -18,7 +18,7 @@ final class RunningViewModel {
         case ready
         case countdown
         case running
-        //
+        case emergency
     }
     
     // Running Condition
@@ -56,7 +56,7 @@ final class RunningViewModel {
                 return "High"
                 
             case .emergency:
-                return "Dangerous"
+                return "Danger"
             }
         }
         
@@ -119,6 +119,10 @@ final class RunningViewModel {
     //make sure tab yang akan muncul duluan adalah tab 1
     var selectedTab = 1
     
+    //for slow down
+    var showSlowDown: Bool = false
+    private var slowDownTask: Task<Void, Never>?
+    
     //placeholder angka -> ubah biar bisa connect
     var heartRate = 0
     var bodyTemperature = 34.8
@@ -138,12 +142,15 @@ final class RunningViewModel {
     // evironment data
     private let environmentDataManager = EnvironmentDataManager()
     
+    //location user
+    private let locationManager = LocationManager()
+    
     //runner
     private var currentRunner: Runner?
     
     private var riskCalculationTimer: Task<Void, Never>?
     
-    //function for ready animation
+    // MARK: function for ready animation
     func startReady() {
         
         progressReady = 0
@@ -213,6 +220,7 @@ final class RunningViewModel {
     
     func stopTimer() {
         guard let runner = currentRunner else { return }
+        idleReminderTask?.cancel()
         timerTask?.cancel()
         let finishTime = Date()
         isFinished = true
@@ -221,7 +229,7 @@ final class RunningViewModel {
             await saveFinishTime(runner: runner, finishTime: finishTime)
         }
     }
-        
+    
     //function untuk masukin data timer ke database
     @MainActor
     private func saveStartTime(runner: Runner, startTime: Date) async {
@@ -249,6 +257,7 @@ final class RunningViewModel {
         }
     }
     
+    // MARK: function for monitoring
     func startMonitoring(runner: Runner) {
         currentRunner = runner
         
@@ -315,11 +324,12 @@ final class RunningViewModel {
     }
     
     // MARK: risk calculation dari suhu, hum, heart rate, dan wrist temp
-    
+        
     @MainActor
     private func performRiskCalculation() async {
         guard let runner = currentRunner else { return }
         guard let age = runner.age else { return }
+        
         guard heartRateManager.value > 0 else { return }
         
         let avgHR = Double(heartRateManager.averageHeartRate ?? heartRateManager.value)
@@ -343,13 +353,22 @@ final class RunningViewModel {
         let total = hrScore + coreTempScore + heatIndexScoreValue
         
         let newCondition = mapToRunningCondition(riskLevel)
-        notifyIfNeeded(from: self.condition, to: newCondition)
+        let oldCondition = self.condition
+        
         self.condition = newCondition
+            
+            // Cuma trigger slow down kalau baru PERTAMA KALI masuk emergency dari kondisi lain
+            if newCondition == .emergency && oldCondition != .emergency {
+                triggerSlowDownIfNeeded()
+            }
+            
+        
+        notifyIfNeeded(from: oldCondition, to: newCondition)
         
         let calculation = RiskCalculation(
             id: UUID(),
             runnerId: runner.id,
-            sensorReadingId: nil,   // isi kalau kamu udah simpan sensor_readings & tau ID-nya, kalau belum biarin nil
+            sensorReadingId: nil,
             heartRate: avgHR,
             bodyTemperatureC: bodyTemperature,
             heatIndexC: heatIndexValue,
@@ -378,7 +397,7 @@ final class RunningViewModel {
         case .safe: return .safe
         case .moderate: return .moderate
         case .high: return .high
-        case .veryHigh: return .emergency
+        case .emergency: return .emergency
         }
     }
     
@@ -389,14 +408,14 @@ final class RunningViewModel {
         case .high:
             NotificationManager.shared.send(
                 category: .high,
-                title: "Heat risk rising",
-                body: "Slow down and hydrate now."
+                title: "High",
+                body: ""
             )
         case .emergency:
             NotificationManager.shared.send(
                 category: .danger,
-                title: "Dangerous heat level",
-                body: "Stop and cool down immediately."
+                title: "Danger",
+                body: "Stop when not feeling well & keep hydrating"
             )
         default:
             break
@@ -424,4 +443,114 @@ final class RunningViewModel {
         startMonitoring(runner: runner)
     }
     
+    // MARK: function for emergency
+    private var activeHelpRequestId: UUID?
+    
+    //status pending (call emergency)
+    func callEmergency() {
+        guard let runner = currentRunner else { return }
+        
+        idleReminderTask?.cancel()
+        locationManager.start()
+        state = .emergency
+        
+        Task {
+            await createHelpRequest(runner: runner)
+        }
+    }
+    
+    @MainActor
+    private func createHelpRequest(runner: Runner) async {
+        let newId = UUID()
+        activeHelpRequestId = newId
+        
+        let coordinate = locationManager.currentCoordinate
+        
+        let request = HelpRequest(
+            id: newId,
+            runnerId: runner.id,
+            eventId: runner.eventId,
+            requestedAt: Date(),
+            latitude: coordinate?.latitude,
+            longitude: coordinate?.longitude,
+            status: "pending",
+            riskLevelAtRequest: condition.title.lowercased(),
+            marshalId: nil,
+            respondedAt: nil
+        )
+        
+        do {
+            try await SupabaseManager.client
+                .from("help_requests")
+                .insert(request)
+                .execute()
+        } catch {
+            print(error)
+        }
+    }
+    
+    //status resolved for emergency
+    func resolveEmergency() {
+        state = .running
+        
+        Task {
+            await resolveHelpRequest()
+        }
+    }
+    
+    @MainActor
+    private func resolveHelpRequest() async {
+        guard let requestId = activeHelpRequestId else { return }
+        
+        do {
+            try await SupabaseManager.client
+                .from("help_requests")
+                .update([
+                    "status": "resolved",
+                    "responded_at": ISO8601DateFormatter().string(from: Date())
+                ])
+                .eq("id", value: requestId)
+                .execute()
+            activeHelpRequestId = nil
+        } catch {
+            print(error)
+        }
+    }
+    
+    // MARK: function for slow down
+    
+    private var idleReminderTask: Task<Void, Never>?
+    
+    func triggerSlowDownIfNeeded() {
+        guard condition == .emergency, firstTimeDangereous, !showSlowDown else { return }
+        showSlowDown = true
+        
+        slowDownTask?.cancel()
+        slowDownTask = Task {
+            try? await Task.sleep(for: .seconds(10))
+            guard !Task.isCancelled else { return }
+            showSlowDown = false
+            scheduleIdleReminder()
+        }
+    }
+    
+    func dismissSlowDown() {
+        slowDownTask?.cancel()
+        showSlowDown = false
+        scheduleIdleReminder()
+    }
+    
+    // function untuk mengatur supaya slow down muncul tiap 5 menit jika diabaikan
+    private func scheduleIdleReminder() {
+        idleReminderTask?.cancel()
+        idleReminderTask = Task {
+            try? await Task.sleep(for: .seconds(300))
+            guard !Task.isCancelled else { return }
+            triggerSlowDownIfNeeded()
+        }
+    }
+    
+    func cancelIdleReminder() {
+        idleReminderTask?.cancel()
+    }
 }

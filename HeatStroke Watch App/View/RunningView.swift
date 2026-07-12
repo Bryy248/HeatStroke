@@ -9,21 +9,33 @@ import SwiftUI
 
 struct RunningView: View {
     
-    // TODO: JANGAN LUPA DIGANTI (untuk ngambil dr readyview)
-    //    let runner: Runner
+    let runner: Runner
     
     @State private var viewModel = RunningViewModel()
+    @State private var didFinish = false
     
     var body: some View {
-        switch viewModel.state {
-        case .ready:
-            ReadyView
-        case .countdown:
-            CountdownView
-        case .running:
-            RunningView
+        if didFinish {
+            FinishView(runner: runner, elapsedSeconds: viewModel.elapsedSeconds)
+        }
+        else {
+            content
         }
     }
+
+        @ViewBuilder
+        private var content: some View {
+            switch viewModel.state {
+            case .ready:      ReadyView
+            case .countdown:  CountdownView
+            case .running:
+                ZStack {
+                    RunningView
+                    if viewModel.showSlowDown { SlowDownView }
+                }
+            case .emergency:  EmergencyView(viewModel: viewModel)
+            }
+        }
     
     private var ReadyView: some View {
         VStack(spacing: 16) {
@@ -65,13 +77,49 @@ struct RunningView: View {
                         .rotationEffect(.degrees(-90))
                 }
                 .frame(width: 131, height: 131)
-                // TODO: JANGAN LUPA DIGANTI
-//                .task {await viewModel.startCountdown(runner: runner)}
-                .task {await viewModel.startCountdown(runner: Runner.dummy)}
+                .task {await viewModel.startCountdown(runner: runner)}
             }
             Text("Start Monitoring")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white)
+        }
+    }
+    
+    private var SlowDownView: some View {
+        ZStack {
+            (isBlinkOn ? Color.red : Color.white)
+                       .ignoresSafeArea()
+            
+            VStack {
+                Text("Slow\nDown")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundColor(isBlinkOn ? .white : .red)   // ✅ ikut kontras background
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            viewModel.dismissSlowDown()
+        }
+        .onAppear {
+            startBlinking()
+        }
+        .onDisappear {
+            blinkTask?.cancel()
+        }
+    }
+    
+    @State private var isBlinkOn = true
+    @State private var blinkTask: Task<Void, Never>?
+
+    private func startBlinking() {
+        blinkTask?.cancel()
+        blinkTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(0.5))
+                isBlinkOn.toggle()
+            }
         }
     }
     
@@ -85,7 +133,7 @@ struct RunningView: View {
                     VStack(spacing: 6) {
                         Button {
                             viewModel.stopTimer()
-                            // TODO: navigate to finish page @bricang
+                            didFinish = true
                         } label: {
                             Image(systemName: "flag.pattern.checkered")
                                 .font(.system(size: 28, weight: .semibold))
@@ -109,7 +157,7 @@ struct RunningView: View {
                             } else {
                                 viewModel.pauseTimer()
                             }
-
+                            
                         } label: {
                             Image(systemName: viewModel.isPaused ? "play.fill" : "pause.fill")
                                 .font(.system(size: 28, weight: .semibold))
@@ -129,8 +177,7 @@ struct RunningView: View {
                 // emergency call
                 VStack(spacing: 6) {
                     Button {
-                        // They will call emergency
-                        // goes to Emergency view
+                        viewModel.callEmergency()
                     } label: {
                         Image(systemName: "phone.fill")
                             .font(.system(size: 28, weight: .semibold))
@@ -153,9 +200,10 @@ struct RunningView: View {
                     ZStack {
                         Circle()
                             .foregroundStyle(viewModel.condition.color)
+                            .frame(width: 65, height: 65)
                             .blur(radius: 42)
                             .shadow(color: .color1, radius: 42)
-                            .frame(width: 65, height: 65)
+//                            .frame(width: 65, height: 65)
                         
                         VStack {
                             Image(systemName: viewModel.condition.icon)
@@ -168,15 +216,16 @@ struct RunningView: View {
                         }
                         .frame(width: 141, height: 110)
                     }
+                    .frame(width: 200, height: 150)
                     
                     if viewModel.firstTimeDangereous && viewModel.condition == .emergency {
-                        Text("Slow down your pace & drink water now!")
+                        Text("Stop when not feeling well & keep hydrating")
                             .font(.system(size: 16, weight: .light))
                             .foregroundColor(viewModel.isPaused ? .gray :.white)
                             .multilineTextAlignment(.center)
                         
                         Button {
-                            // goes to emergency view
+                            viewModel.callEmergency()
                         } label: {
                             Text("I'm not okay")
                                 .font(.system(size: 14, weight: .semibold))
@@ -189,9 +238,9 @@ struct RunningView: View {
                         
                         Button {
                             viewModel.firstTimeDangereous.toggle()
-                            // stay in here
+                            viewModel.cancelIdleReminder()
                         } label: {
-                            Text("I'm fine")
+                            Text("I'm okay")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(.white)
                         }
@@ -215,7 +264,7 @@ struct RunningView: View {
                         Text("\(viewModel.heartRate)")
                             .font(.system(size: 24))
                             .foregroundColor(viewModel.condition.fontcolor)
-
+                        
                         HStack(spacing: 2) {
                             Image(systemName: "heart.fill")
                                 .foregroundColor(.red)
@@ -230,7 +279,7 @@ struct RunningView: View {
                         Text(String(format: "%.1f°", viewModel.bodyTemperature))
                             .font(.system(size: 24))
                             .foregroundColor(viewModel.condition.fontcolor)
-
+                        
                         HStack(spacing: 2) {
                             Image(systemName: "thermometer.variable.and.figure")
                                 .foregroundColor(.suhuBgcolor)
@@ -283,49 +332,13 @@ struct RunningView: View {
             .tag(2)
         }
         .tabViewStyle(.page)
-        }
-    }
-
-// TODO: JANGAN LUPA DIHAPUS
-//DUMMY UNTUK RUN (NABIEL) - JANGAN LUPA DIHAPUS
-extension Runner {
-    static var dummy: Runner {
-        Runner(
-            id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
-            eventId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
-            name: "Bryan Chang",
-            bibNumber: "M1234",
-            age: 21,
-            birthDate: nil,
-            gender: "male",
-            currentRiskLevel: nil,
-            lastUpdated: nil,
-            createdAt: nil,
-            registeredBy: nil,
-            startTime: nil,
-            finishTime: nil
-        )
+        .background(Color.black)
     }
 }
 
 
 #Preview {
-    RunningView(
-//        runner: Runner(
-//            id: UUID(uuidString: "22222222-2222-2222-2222-222222222221")!,
-//            eventId: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
-//            name: "Bryan Chang",
-//            bibNumber: "M1234",
-//            age: 21,
-//            birthDate: nil,
-//            gender: "male",
-//            currentRiskLevel: nil,
-//            lastUpdated: nil,
-//            createdAt: nil,
-//            registeredBy: nil,
-//            startTime: nil,
-//            finishTime: nil
-//        )
-    )
+//    RunningView(
+//    )
 }
 

@@ -15,10 +15,12 @@ class ReadyViewModel: ObservableObject {
     @Published private(set) var avgTemperature: Double? = nil
     @Published var goToRunning = false
 
+    let runner: Runner
     private let env: EnvironmentDataManager
-
-    init(env: EnvironmentDataManager) {
+    
+    init(env: EnvironmentDataManager, runner: Runner) {
         self.env = env
+        self.runner = runner
         // forward: perubahan di manager otomatis mem-publish ulang lewat VM
         env.$isConnected.assign(to: &$isConnected)
         env.$averageHumidity.assign(to: &$avgHumidity)

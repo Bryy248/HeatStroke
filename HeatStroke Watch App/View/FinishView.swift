@@ -9,6 +9,8 @@ import SwiftUI
 
 struct FinishView: View {
     
+    let runner: Runner
+    let elapsedSeconds: Int
     @State private var viewModel = FinishViewModel()
     
     var body: some View {
@@ -69,7 +71,7 @@ struct FinishView: View {
                         .padding(.bottom, 4)
                     
                     Button {
-                        // Aksi Button akan kembali ke page awal
+                        NotificationCenter.default.post(name: .goHome, object: nil)
                     } label: {
                         Text("Confirm")
                             .font(.system(size: 14, weight: .semibold))
@@ -81,10 +83,13 @@ struct FinishView: View {
                 }
             }
         }
+        .task {
+            await viewModel.fetchFinishData(runner: runner, elapsedSeconds: elapsedSeconds)
+        }
     }
 }
 
-#Preview {
-    FinishView()
-}
+//#Preview {
+//    FinishView()
+//}
 
