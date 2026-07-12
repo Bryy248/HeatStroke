@@ -68,6 +68,8 @@ class FinishViewModel {
     @MainActor
     func fetchFinishData(runner: Runner, elapsedSeconds: Int) async {
         finishDuration = Self.formatDuration(seconds: elapsedSeconds)
+        
+//        didStopEarly = await hasEmergencyRecord(runnerId: runner.id)
 
         do {
             let calculations: [RiskCalculation] = try await SupabaseManager.client
@@ -81,6 +83,22 @@ class FinishViewModel {
             print("Gagal mengambil data risk_calculations: \(error)")
         }
     }
+    
+//    private func hasEmergencyRecord(runnerId: UUID) async -> Bool {
+//        do {
+//            let requests: [HelpRequest] = try await SupabaseManager.client
+//                .from("help_requests")
+//                .select()
+//                .eq("runner_id", value: runnerId)
+//                .limit(1)
+//                .execute()
+//                .value
+//            return !requests.isEmpty
+//        } catch {
+//            print("Gagal cek help_requests: \(error)")
+//            return false
+//        }
+//    }
 
     static func averageRiskLevel(from calculations: [RiskCalculation]) -> RiskLevel {
         let scores = calculations.map { Double($0.totalScore) }
