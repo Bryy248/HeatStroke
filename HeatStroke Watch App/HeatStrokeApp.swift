@@ -27,7 +27,5 @@ struct HeatStroke_Watch_AppApp: App {
                 }
             
         }
-        WKNotificationScene(controller: NotificationController.self, category: "HIGH_ALERT")
-        WKNotificationScene(controller: NotificationController.self, category: "DANGER_ALERT")
     }
 }

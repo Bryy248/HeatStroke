@@ -408,14 +408,14 @@ final class RunningViewModel {
         case .high:
             NotificationManager.shared.send(
                 category: .high,
-                title: "Heat risk rising",
-                body: "Slow down and hydrate now."
+                title: "High",
+                body: ""
             )
         case .emergency:
             NotificationManager.shared.send(
                 category: .danger,
-                title: "Dangerous heat level",
-                body: "Stop and cool down immediately."
+                title: "Danger",
+                body: "Stop when not feeling well & keep hydrating"
             )
         default:
             break
