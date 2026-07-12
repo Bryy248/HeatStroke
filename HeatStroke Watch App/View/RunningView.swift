@@ -12,25 +12,30 @@ struct RunningView: View {
     let runner: Runner
     
     @State private var viewModel = RunningViewModel()
+    @State private var didFinish = false
     
     var body: some View {
-        switch viewModel.state {
-        case .ready:
-            ReadyView
-        case .countdown:
-            CountdownView
-        case .running:
-            ZStack {
-                RunningView
-                
-                if viewModel.showSlowDown {
-                    SlowDownView //overlay untuk slowdown
-                }
-            }
-        case .emergency:
-            EmergencyView(viewModel: viewModel)
+        if didFinish {
+            FinishView(runner: runner, elapsedSeconds: viewModel.elapsedSeconds)
+        }
+        else {
+            content
         }
     }
+
+        @ViewBuilder
+        private var content: some View {
+            switch viewModel.state {
+            case .ready:      ReadyView
+            case .countdown:  CountdownView
+            case .running:
+                ZStack {
+                    RunningView
+                    if viewModel.showSlowDown { SlowDownView }
+                }
+            case .emergency:  EmergencyView(viewModel: viewModel)
+            }
+        }
     
     private var ReadyView: some View {
         VStack(spacing: 16) {
@@ -128,7 +133,7 @@ struct RunningView: View {
                     VStack(spacing: 6) {
                         Button {
                             viewModel.stopTimer()
-                            // TODO: navigate to finish page @bricang
+                            didFinish = true
                         } label: {
                             Image(systemName: "flag.pattern.checkered")
                                 .font(.system(size: 28, weight: .semibold))

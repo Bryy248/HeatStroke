@@ -16,64 +16,94 @@ class FinishViewModel {
         case finishWithAlert
         case stopEarly
     }
-    
-    enum RiskLevel: String {
-        case easy
-        case moderate
-        case high
-        case danger
 
-        var displayName: String {
-            switch self {
-            case .easy:     "Safe"
-            case .moderate: "Moderate"
-            case .high:     "High"
-            case .danger:   "Danger"
-            }
-        }
-    }
-    
     var finishDuration = ""
-    var riskLevel: RiskLevel = .easy
-    
-    var didStopEarly = false // nanti ambil data apakah stop early atau engga
-    
+    var riskLevel: RiskLevel = .safe
+    var didStopEarly = false
+
     var finishState: FinishType {
         if didStopEarly {
             return .stopEarly
         }
         switch riskLevel {
-        case .easy, .moderate:
+        case .safe, .moderate:
             return .finish
-        case .high, .danger:
+        case .high, .emergency:
             return .finishWithAlert
         }
     }
-    
+
     @MainActor
-    func fetchFinishData(runnerId: UUID) async {
+    func fetchCurrentRunner(eventId: UUID) async -> Runner? {
+        if SupabaseManager.client.auth.currentUser == nil {
+            do {
+                try await SupabaseManager.client.auth.signInAnonymously()
+            } catch {
+                print("anon sign-in failed: \(error)")
+                return nil
+            }
+        }
+
+        guard let uid = SupabaseManager.client.auth.currentUser?.id else {
+            print("User ID tidak tersedia")
+            return nil
+        }
+
         do {
             let runners: [Runner] = try await SupabaseManager.client
                 .from("runners")
                 .select()
-                .eq("id", value: runnerId)
+                .eq("registered_by", value: uid)
+                .eq("event_id", value: eventId)
+                .limit(1)
                 .execute()
                 .value
-            
-            guard let runner = runners.first else {
-                print("Runner Tidak Ditemukan")
-                return
-            }
-            
-            if let start = runner.startTime, let finish = runner.finishTime {
-                finishDuration = Self.formatDuration(from: start, to: finish)
-            }
-            
-            riskLevel = RiskLevel(rawValue: runner.currentRiskLevel ?? "") ?? .easy
-            
+            return runners.first
+        } catch {
+            print("Gagal mengambil runner: \(error)")
+            return nil
         }
-        catch {
-            print("Gagal Mengambil data")
+    }
+
+    @MainActor
+    func fetchFinishData(runner: Runner, elapsedSeconds: Int) async {
+        finishDuration = Self.formatDuration(seconds: elapsedSeconds)
+
+        do {
+            let calculations: [RiskCalculation] = try await SupabaseManager.client
+                .from("risk_calculations")
+                .select()
+                .eq("runner_id", value: runner.id)
+                .execute()
+                .value
+            riskLevel = Self.averageRiskLevel(from: calculations)
+        } catch {
+            print("Gagal mengambil data risk_calculations: \(error)")
+        }
+    }
+
+    static func averageRiskLevel(from calculations: [RiskCalculation]) -> RiskLevel {
+        let scores = calculations.map { Double($0.totalScore) }
+        guard !scores.isEmpty else { return .safe }
+        let avg = scores.reduce(0, +) / Double(scores.count)
+        return RiskLevel(totalScore: avg)
+    }
+
+    static func formatDuration(seconds: Int) -> String {
+        let h = seconds / 3600
+        let m = (seconds % 3600) / 60
+        let s = seconds % 60
+        return String(format: "%d:%02d:%02d", h, m, s)
+    }
+}
+
+extension RiskLevel {
+    init(totalScore: Double) {
+        switch totalScore {
+        case ..<5:  self = .safe
+        case ..<15: self = .moderate
+        case ..<25: self = .high
+        default:    self = .emergency
         }
     }
 }
@@ -87,7 +117,7 @@ extension FinishViewModel {
                 circleBackground: .inputBgcolor,
                 title: "You did it!", subtitleColor: .color1,
                 finishTime: finishDuration,
-                avgZone: riskLevel.displayName,
+                avgZone: riskLevel.label,
                 statBackground: .inputBgcolor,
                 message: "Stayed safe the whole race!",
                 messageColor: .color1, buttonTint: .color1
@@ -98,7 +128,7 @@ extension FinishViewModel {
                 circleBackground: .inputBgcolor,
                 title: "You did it!", subtitleColor: .color1,
                 finishTime: finishDuration,
-                avgZone: riskLevel.displayName,
+                avgZone: riskLevel.label,
                 statBackground: .inputBgcolor,
                 message: "Made it, but heat risk rose twice. Rest and hydrate well.",
                 messageColor: .yellow, buttonTint: .color1
@@ -109,19 +139,11 @@ extension FinishViewModel {
                 circleBackground: .finish,
                 title: "Stopped early", subtitleColor: .red,
                 finishTime: finishDuration,
-                avgZone: riskLevel.displayName,
-                statBackground: .gray.opacity(0.2),
+                avgZone: riskLevel.label,
+                statBackground: .inputBgcolor,
                 message: "Good call stopping. Rest, hydrate, see medical if needed.",
                 messageColor: .red, buttonTint: .red
             )
         }
     }
-    
-    static func formatDuration(from start: Date, to finish: Date) -> String {
-            let seconds = Int(finish.timeIntervalSince(start))   // selisih dalam detik
-            let h = seconds / 3600
-            let m = (seconds % 3600) / 60
-            let s = seconds % 60
-            return String(format: "%d:%02d:%02d", h, m, s)       // "2:30:08"
-        }
 }
