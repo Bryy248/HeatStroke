@@ -35,5 +35,5 @@ struct NotificationView: View {
 }
 
 #Preview {
-    NotificationView(category: "HIGH_ALERT", title: "Slow Down", message: "Take it easy, your Heart Rate too high and the envyronment too hot also")
+    NotificationView(category: "DANGER_ALERT", title: "Slow Down", message: "Take it easy, your Heart Rate too high and the envyronment too hot also")
 }

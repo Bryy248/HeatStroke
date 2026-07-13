@@ -22,6 +22,7 @@ class NotificationController: WKUserNotificationHostingController<NotificationVi
 
     override func didReceive(_ notification: UNNotification) {
         let content = notification.request.content
+        print("category:", content.categoryIdentifier)
         category    = content.categoryIdentifier
         notifTitle  = content.title
         notifMessage = content.body
