@@ -32,21 +32,20 @@ class ReadyViewModel: ObservableObject {
     var humidity: Int { Int((avgHumidity ?? 0).rounded()) }
     var temperature: Int { Int((avgTemperature ?? 0).rounded()) }
 
-    private let trimStart: CGFloat = 0.06
-    private let humidityTrimFull: CGFloat = 0.7305
-    private let tempTrimFull: CGFloat = 0.752
+    private let humidityTrimStartMin: CGFloat = 0.07
+    private let humidityTrimEndFixed: CGFloat = 0.93
+    private let temperatureTrimStartMin: CGFloat = 0.07
+    private let temperatureTrimEndFixed: CGFloat = 0.92
     private let tempMax: CGFloat = 43
-    private let tempStart: CGFloat = 0.07
-    private let tempEnd: CGFloat = 0.92
     
-    var humidityTrimEnd: CGFloat {
-        let pct = CGFloat(humidity) / 100
-        return trimStart + (humidityTrimFull - trimStart) * min(max(pct, 0), 1)
+    var humidityTrimStart: CGFloat {
+        let pct = min(max(CGFloat(humidity) / 100, 0), 1)
+        return humidityTrimEndFixed - (humidityTrimEndFixed - humidityTrimStartMin) * pct
     }
 
-    var temperatureTrimEnd: CGFloat {
-        let progress = CGFloat(temperature) / tempMax
-        return tempStart + (tempEnd - tempStart) * progress
+    var temperatureTrimStart: CGFloat {
+        let pct = min(max(CGFloat(temperature) / tempMax, 0), 1)
+        return temperatureTrimEndFixed - (temperatureTrimEndFixed - temperatureTrimStartMin) * pct
     }
     
     func start() { env.start() }

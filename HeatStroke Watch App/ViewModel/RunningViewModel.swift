@@ -409,7 +409,7 @@ final class RunningViewModel {
             NotificationManager.shared.send(
                 category: .high,
                 title: "High",
-                body: ""
+                body: "You are in High Stage"
             )
         case .emergency:
             NotificationManager.shared.send(
