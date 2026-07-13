@@ -51,12 +51,12 @@ struct ReadyViewOption: View {
                     
                     // LAYER 3: progressannya
                     Circle()
-                        .trim(from: 0.06, to: vm.humidityTrimEnd)
+                        .trim(from: vm.humidityTrimStart, to: 0.93)
                         .stroke(
                             Color(.humid),
                             style: StrokeStyle(lineWidth: 22, lineCap: .round)
                         )
-                        .rotationEffect(Angle(degrees: 35))
+                        .rotationEffect(Angle(degrees: -90))
                         .frame(width: 170, height: 170)
                     
                     HStack(alignment: .lastTextBaseline, spacing: 2) {
@@ -100,12 +100,12 @@ struct ReadyViewOption: View {
                     
                     // LAYER 3: progressannya
                     Circle()
-                        .trim(from: 0.07, to: vm.temperatureTrimEnd)
+                        .trim(from: vm.temperatureTrimStart, to: 0.92)
                         .stroke(
                             Color(.orange),
                             style: StrokeStyle(lineWidth: 22, lineCap: .round)
                         )
-                        .rotationEffect(Angle(degrees: 35))
+                        .rotationEffect(Angle(degrees: -90))
                         .frame(width: 110, height: 110)
                     
                     Text("\(vm.temperature)°")
@@ -169,5 +169,24 @@ struct ReadyViewOption: View {
 }
 
 #Preview {
-//    ReadyViewOption(vm: ReadyViewModel(env: EnvironmentDataManager()))
+    ReadyViewOption(
+        vm: ReadyViewModel(
+            env: EnvironmentDataManager(),
+            runner: Runner(
+                id: UUID(),
+                eventId: UUID(),
+                name: "Budi Santoso",
+                bibNumber: "A123",
+                age: 28,
+                birthDate: "1998-05-12",
+                gender: "male",
+                currentRiskLevel: "low",
+                lastUpdated: "2026-07-13T14:14:00Z",
+                createdAt: "2026-07-01T09:00:00Z",
+                registeredBy: UUID(),
+                startTime: Date(),
+                finishTime: nil
+            )
+        )
+    )
 }
